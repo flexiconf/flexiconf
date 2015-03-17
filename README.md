@@ -8,7 +8,7 @@ Flexible configuration for JVM projects.
 - Generate automated documentation for your schema using Markdown
 
 **Config**
-- Built-in directives (`include`, `group`, and `use`) included for organizing configuration
+- Includes built-in directives (`include`, `group`, and `use`) for organizing configuration
 
 ### Sample schema
 
