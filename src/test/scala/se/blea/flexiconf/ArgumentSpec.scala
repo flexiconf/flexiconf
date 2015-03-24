@@ -94,6 +94,62 @@ class ArgumentSpec extends FlatSpec with Matchers {
     rejects("")
   }
 
+  behavior of "DurationArgument"
+
+  it should "return longs for duration arguments" in {
+    val a = DurationArgument
+    val res = a.valueOf("10s")
+
+    assert(res == 10000)
+    assert(res.isInstanceOf[Long])
+  }
+
+  it should "recognize and accept duration values" in {
+    implicit val a = DurationArgument
+
+    rejects("\"hello\"")
+    rejects("'world'")
+    rejects("foobar")
+    rejects("0")
+    rejects("101")
+    accepts("100ms")
+    accepts("10s")
+    accepts("1m")
+    accepts("2h")
+    rejects("on")
+    rejects("off")
+    rejects("true")
+    rejects("false")
+    rejects("")
+  }
+
+  behavior of "PercentageArgument"
+
+  it should "return doubles for percentage arguments" in {
+    val a = PercentageArgument
+    val res = a.valueOf("50%")
+
+    assert(res == 0.5)
+    assert(res.isInstanceOf[Double])
+  }
+
+  it should "recognize and accept percentage values" in {
+    implicit val a = PercentageArgument
+
+    rejects("\"hello\"")
+    rejects("'world'")
+    rejects("foobar")
+    rejects("0")
+    rejects("101")
+    rejects("100ms")
+    accepts("10%")
+    accepts("1000%")
+    rejects("on")
+    rejects("off")
+    rejects("true")
+    rejects("false")
+    rejects("")
+  }
 
   behavior of "BoolArgument"
 
@@ -144,10 +200,10 @@ class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
   }
 
   it should "return list of arguments when visiting argument lists" in {
-    val ctx = parse( """1 off "true" 500.2 foo bar""")
+    val ctx = parse( """1 off "true" 500.2 foo bar 100ms 25%""")
     val result = ArgumentVisitor(ctx.argumentList)
 
-    assert(result.size == 6)
+    assert(result.size == 8)
     assert(result.forall(_.isInstanceOf[Argument]))
 
     assert(result(0).kind == IntArgument)
@@ -156,6 +212,9 @@ class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     assert(result(3).kind == DecimalArgument)
     assert(result(4).kind == StringArgument)
     assert(result(5).kind == StringArgument)
+    assert(result(6).kind == DurationArgument)
+    assert(result(7).kind == PercentageArgument)
+
   }
 
   it should "return string arguments for quoted string arguments" in {
@@ -194,5 +253,17 @@ class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     val result = ArgumentVisitor(parse("0.300").argument)
     assert(result(0).kind == DecimalArgument)
     assert(result(0).value == "0.300")
+  }
+
+  it should "return duration arguments for duration values" in {
+    val result = ArgumentVisitor(parse("10s").argument)
+    assert(result(0).kind == DurationArgument)
+    assert(result(0).value == "10s")
+  }
+
+  it should "return percentage arguments for percentage values" in {
+    val result = ArgumentVisitor(parse("10%").argument)
+    assert(result(0).kind == PercentageArgument)
+    assert(result(0).value == "10%")
   }
 }

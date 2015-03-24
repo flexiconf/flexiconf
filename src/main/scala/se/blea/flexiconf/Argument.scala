@@ -60,6 +60,36 @@ case object DecimalArgument extends ArgumentType[Double] {
 }
 
 
+/** Duration values */
+case object DurationArgument extends ArgumentType[Long] {
+  val durationPattern = "(0|[1-9]\\d*)(ms|s|m|h)".r
+  val multipliers = Map("ms" -> 1,
+                        "s" -> 1000,
+                        "m" -> 60000,
+                        "h" -> 3600000)
+
+  override def accepts(value: String) = durationPattern.pattern.matcher(value).matches
+  override def valueOf(value: String) = value match {
+    case durationPattern(amount, unit) => amount.toLong * multipliers.getOrElse(unit, 1)
+    case _ => throw new IllegalStateException(s"Can't get duration value from $value")
+  }
+  override def toString = "Duration"
+}
+
+
+/** Percentage values */
+case object PercentageArgument extends ArgumentType[Double] {
+  val percentagePattern = "(0|[1-9]\\d*)%".r
+
+  override def accepts(value: String) = percentagePattern.pattern.matcher(value).matches
+  override def valueOf(value: String) = value match {
+    case percentagePattern(amount) => amount.toDouble / 100
+    case _ => throw new IllegalStateException(s"Can't get percentage value from $value")
+  }
+  override def toString = "Percentage"
+}
+
+
 /** String values */
 case object StringArgument extends ArgumentType[String] {
   override def accepts(value: String) = true
@@ -89,4 +119,6 @@ private[flexiconf] object ArgumentVisitor extends ConfigBaseVisitor[Argument] {
   override def visitIntegerValue(ctx: IntegerValueContext) = IntArgument(ctx.getText)
   override def visitBooleanValue(ctx: BooleanValueContext) = BoolArgument(ctx.getText)
   override def visitDecimalValue(ctx: DecimalValueContext) = DecimalArgument(ctx.getText)
+  override def visitDurationValue(ctx: DurationValueContext) = DurationArgument(ctx.getText)
+  override def visitPercentageValue(ctx: PercentageValueContext) = PercentageArgument(ctx.getText)
 }

@@ -50,6 +50,8 @@ argument
  : quotedStringValue
  | integerValue
  | decimalValue
+ | durationValue
+ | percentageValue
  | booleanValue
  | unquotedStringValue
  ;
@@ -64,6 +66,14 @@ integerValue
 
 decimalValue
  : DECIMAL_LITERAL
+ ;
+
+durationValue
+ : DURATION_LITERAL
+ ;
+
+percentageValue
+ : PERCENTAGE_LITERAL
  ;
 
 booleanValue
@@ -105,6 +115,21 @@ DECIMAL_LITERAL
  | DECIMAL_INT_LITERAL
  ;
 
+DURATION_LITERAL
+ : DECIMAL_INT_LITERAL DURATION_UNIT_LITERAL
+ ;
+
+DURATION_UNIT_LITERAL
+ : 'ms'
+ | 's'
+ | 'm'
+ | 'h'
+ ;
+
+PERCENTAGE_LITERAL
+ : DECIMAL_INT_LITERAL PERCENT
+ ;
+
 BOOLEAN_TRUE_LITERAL
  : 'on'
  | 'true'
@@ -133,6 +158,10 @@ RBRACE
 
 SEMI
  : ';'
+ ;
+
+PERCENT
+ : '%'
  ;
 
 // Ignore comments
