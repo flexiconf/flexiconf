@@ -62,15 +62,19 @@ case object DecimalArgument extends ArgumentType[Double] {
 
 /** Duration values */
 case object DurationArgument extends ArgumentType[Long] {
-  val durationPattern = "(0|[1-9]\\d*)(ms|s|m|h)".r
-  val multipliers = Map("ms" -> 1,
-                        "s" -> 1000,
-                        "m" -> 60000,
-                        "h" -> 3600000)
+  val durationPattern = "((?:0|[1-9]\\d*)(?:\\.\\d+)?)(ms|s|m|h|d|w|M|y)".r
+  val multipliers = Map("ms" -> 1l,
+                        "s" -> 1000l,
+                        "m" -> 60000l,
+                        "h" -> 3600000l,
+                        "d" -> 86400000l,
+                        "w" -> 604800000l,
+                        "M" -> 26297460000l,
+                        "y" -> 315569520000l)
 
   override def accepts(value: String) = durationPattern.pattern.matcher(value).matches
   override def valueOf(value: String) = value match {
-    case durationPattern(amount, unit) => amount.toLong * multipliers.getOrElse(unit, 1)
+    case durationPattern(amount, unit) => (amount.toDouble * multipliers.getOrElse(unit, 1l)).toLong
     case _ => throw new IllegalStateException(s"Can't get duration value from $value")
   }
   override def toString = "Duration"
@@ -79,7 +83,7 @@ case object DurationArgument extends ArgumentType[Long] {
 
 /** Percentage values */
 case object PercentageArgument extends ArgumentType[Double] {
-  val percentagePattern = "(0|[1-9]\\d*)%".r
+  val percentagePattern = "((?:0|[1-9]\\d*)(?:\\.\\d+)?)%".r
 
   override def accepts(value: String) = percentagePattern.pattern.matcher(value).matches
   override def valueOf(value: String) = value match {
