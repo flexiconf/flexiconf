@@ -26,6 +26,14 @@ DECIMAL_TYPE_LITERAL
  : 'Decimal'
  ;
 
+DURATION_TYPE_LITERAL
+ : 'Duration'
+ ;
+
+PERCENTAGE_TYPE_LITERAL
+ : 'Percentage'
+ ;
+
 BOOLEAN_TYPE_LITERAL
  : 'Bool'
  ;

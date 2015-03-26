@@ -85,6 +85,8 @@ parameterName
 parameterValue
  : integerType
  | decimalType
+ | durationType
+ | percentageType
  | booleanType
  | stringType
  | unknown
@@ -108,6 +110,14 @@ integerType
 
 decimalType
  : DECIMAL_TYPE_LITERAL
+ ;
+
+durationType
+ : DURATION_TYPE_LITERAL
+ ;
+
+percentageType
+ : PERCENTAGE_TYPE_LITERAL
  ;
 
 booleanType

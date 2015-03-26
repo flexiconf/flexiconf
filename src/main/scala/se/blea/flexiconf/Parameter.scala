@@ -17,6 +17,8 @@ private[flexiconf] object ParameterTypeVisitor extends SchemaParserBaseVisitor[A
   override def visitIntegerType(ctx: IntegerTypeContext): ArgumentType[_] = IntArgument
   override def visitBooleanType(ctx: BooleanTypeContext): ArgumentType[_] = BoolArgument
   override def visitDecimalType(ctx: DecimalTypeContext): ArgumentType[_] = DecimalArgument
+  override def visitDurationType(ctx: DurationTypeContext): ArgumentType[_] = DurationArgument
+  override def visitPercentageType(ctx: PercentageTypeContext): ArgumentType[_] = PercentageArgument
 }
 
 /** Returns a Parameter for a given single or list of ParameterContext */
@@ -35,6 +37,8 @@ private[flexiconf] object ParameterVisitor extends SchemaParserBaseVisitor[Param
       case IntArgument => Parameter(name, IntArgument)
       case StringArgument => Parameter(name, StringArgument)
       case DecimalArgument => Parameter(name, DecimalArgument)
+      case DurationArgument => Parameter(name, DurationArgument)
+      case PercentageArgument => Parameter(name, PercentageArgument)
       case BoolArgument => Parameter(name, BoolArgument)
       case _ => Parameter(name, UnknownArgument)
     }

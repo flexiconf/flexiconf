@@ -32,6 +32,8 @@ case class Config(private val rawConfig: DefaultConfigNode) extends ConfigNode {
   override def getStringArg(name: String): String = config.getStringArg(name)
   override def getBoolArg(name: String): Boolean = config.getBoolArg(name)
   override def getDecimalArg(name: String): Double = config.getDecimalArg(name)
+  override def getDurationArg(name: String): Long = config.getDurationArg(name)
+  override def getPercentageArg(name: String): Double = config.getPercentageArg(name)
   override def getWarnings: List[String] = warnings
 
   def renderTree = config.renderTree()
@@ -238,6 +240,8 @@ trait ConfigNode {
   def getStringArg(name: String): String
   def getBoolArg(name: String): Boolean
   def getDecimalArg(name: String): Double
+  def getDurationArg(name: String): Long
+  def getPercentageArg(name: String): Double
   def getWarnings: List[String]
 }
 
@@ -288,6 +292,12 @@ private[flexiconf] case class DefaultConfigNode(private[flexiconf] val directive
 
   /** Get decimal value of argument **/
   override def getDecimalArg(argName: String): Double = getArg(argName, DecimalArgument)
+
+  /** Get duration value of argument **/
+  override def getDurationArg(argName: String): Long = getArg(argName, DurationArgument)
+
+  /** Get percentage value of argument **/
+  override def getPercentageArg(argName: String): Double = getArg(argName, PercentageArgument)
 
   /** Get all warnings */
   override def getWarnings: List[String] = {
