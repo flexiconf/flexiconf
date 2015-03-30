@@ -201,6 +201,16 @@ object Directive {
       withArgument(name, DecimalArgument)
     }
 
+    /** Adds a new duration parameter */
+    def withDurationArg(name: String) = {
+      withArgument(name, DurationArgument)
+    }
+
+    /** Adds a new percentage parameter */
+    def withPercentageArg(name: String) = {
+      withArgument(name, PercentageArgument)
+    }
+
     /** Add documentation for this directive */
     def withDocumentation(documentation: String) = {
       copy(documentation = documentation)
