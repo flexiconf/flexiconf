@@ -2,9 +2,9 @@ package se.blea.flexiconf
 
 import java.io.{File, InputStream}
 
-import org.antlr.v4.runtime.{Lexer, ANTLRInputStream, CommonTokenStream}
+import org.antlr.v4.runtime.{ANTLRInputStream, CommonTokenStream}
 import org.apache.commons.io.FileUtils
-import se.blea.flexiconf.parser.gen.{SchemaLexer, SchemaParser, ConfigLexer, ConfigParser}
+import se.blea.flexiconf.parser.gen.{ConfigLexer, ConfigParser, SchemaLexer, SchemaParser}
 
 
 case class ConfigOptions private (private[flexiconf] val sourceFile: String = "",
@@ -38,12 +38,12 @@ case class ConfigOptions private (private[flexiconf] val sourceFile: String = ""
     this
   }
 
-  def withDirectives(ds: Set[Directive]) = {
+  def withDirectives(ds: Set[DirectiveDefinition]) = {
     visitorOpts = visitorOpts.copy(directives = visitorOpts.directives ++ ds)
     this
   }
 
-  def withDirectives(d: Directive*) = {
+  def withDirectives(d: DirectiveDefinition*) = {
     visitorOpts = visitorOpts.copy(directives = visitorOpts.directives ++ d)
     this
   }
@@ -93,13 +93,13 @@ object Parser {
     FileUtils.openInputStream(new File(sourceFile))
   }
 
-  def parseConfig(opts: ConfigOptions): Option[Config] = {
+  def parseConfig(opts: ConfigOptions): Option[DefaultConfig] = {
     val createStream = { Parser.streamFromSourceFile(opts.sourceFile) }
     val parser = antlrConfigParserFromStream(opts.inputStream getOrElse createStream)
 
-    ConfigNodeVisitor(opts.visitorOpts).visit(parser.document) map { config =>
-      new Config(config)
-    }
+    ConfigNodeVisitor(opts.visitorOpts)
+      .visit(parser.document)
+      .map(DefaultConfig)
   }
 
   private[flexiconf] def antlrSchemaParserFromStream(inputStream: InputStream) = {
@@ -114,8 +114,8 @@ object Parser {
     val createStream = { Parser.streamFromSourceFile(opts.sourceFile) }
     val parser = antlrSchemaParserFromStream(opts.inputStream getOrElse createStream)
 
-    SchemaNodeVisitor(opts.visitorOpts).visit(parser.document) map { schema =>
-      new Schema(schema)
-    }
+    SchemaNodeVisitor(opts.visitorOpts)
+      .visit(parser.document)
+      .map(Schema)
   }
 }

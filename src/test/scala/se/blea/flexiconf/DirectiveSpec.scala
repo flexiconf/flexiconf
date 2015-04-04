@@ -8,14 +8,14 @@ class DirectiveSpec extends FlatSpec with Matchers {
   behavior of "MaybeDirective"
 
   it should "match a node by name" in {
-    val d = Directive.withName("test_node").build
+    val d = DirectiveDefinition.withName("test_node").build
 
     assert(MaybeDirective("test_node") matches d)
     assert(MaybeDirective("node_test") doesNotMatch d)
   }
 
   it should "match a node by name and argument type" in {
-    val d = Directive.withName("test_node")
+    val d = DirectiveDefinition.withName("test_node")
       .withStringArg("val1")
       .withDecimalArg("val2")
       .build
@@ -48,11 +48,11 @@ class DirectiveSpec extends FlatSpec with Matchers {
   }
 
   it should "match a node by name, args, and block allowance" in {
-    val d1 = Directive.withName("without_block")
+    val d1 = DirectiveDefinition.withName("without_block")
       .withIntArg("val1")
       .build
 
-    val d2 = Directive.withName("with_block")
+    val d2 = DirectiveDefinition.withName("with_block")
       .withBoolArg("val1")
       .withDirectives(d1)
       .build
@@ -67,11 +67,11 @@ class DirectiveSpec extends FlatSpec with Matchers {
   }
 
   it should "require a block with children directives" in {
-    val d1 = Directive.withName("without_block")
+    val d1 = DirectiveDefinition.withName("without_block")
       .withIntArg("val1")
       .build
 
-    val d2 = Directive.withName("with_block")
+    val d2 = DirectiveDefinition.withName("with_block")
       .withBoolArg("val1")
       .withDirectives(d1)
       .build
@@ -86,24 +86,24 @@ class DirectiveSpec extends FlatSpec with Matchers {
 class DirectiveBuilderSpec extends FlatSpec with Matchers {
   it should "disallow null names" in {
     intercept[NullPointerException] {
-      Directive.withName(null)
+      DirectiveDefinition.withName(null)
     }
   }
 
   it should "disallow empty names" in {
     intercept[IllegalArgumentException] {
-      Directive.withName("")
+      DirectiveDefinition.withName("")
     }
   }
 
   it should "disallow names starting with $" in {
     intercept[IllegalArgumentException] {
-      Directive.withName("$")
+      DirectiveDefinition.withName("$")
     }
   }
 
   it should "create a new copy when provided an argument" in {
-    val d1 = Directive.withName("foo")
+    val d1 = DirectiveDefinition.withName("foo")
     val d2 = d1.withBoolArg("arg1")
 
     assert(d1 != d2)
@@ -112,7 +112,7 @@ class DirectiveBuilderSpec extends FlatSpec with Matchers {
   }
 
   it should "create a new copy when provided a directive" in {
-    val d1 = Directive.withName("foo")
+    val d1 = DirectiveDefinition.withName("foo")
     val dir = d1.build
     val d2 = d1.withDirectives(dir)
 
@@ -122,48 +122,48 @@ class DirectiveBuilderSpec extends FlatSpec with Matchers {
   }
 
   it should "allow adding int args" in {
-    val d = Directive.withName("foo").withIntArg("val").build
+    val d = DirectiveDefinition.withName("foo").withIntArg("val").build
     assert(d.parameters(0).name == "val")
     assert(d.parameters(0).kind == IntArgument)
   }
 
   it should "allow adding bool args" in {
-    val d = Directive.withName("foo").withBoolArg("val").build
+    val d = DirectiveDefinition.withName("foo").withBoolArg("val").build
     assert(d.parameters(0).name == "val")
     assert(d.parameters(0).kind == BoolArgument)
   }
 
   it should "allow adding string args" in {
-    val d = Directive.withName("foo").withStringArg("val").build
+    val d = DirectiveDefinition.withName("foo").withStringArg("val").build
     assert(d.parameters(0).name == "val")
     assert(d.parameters(0).kind == StringArgument)
   }
 
   it should "allow adding decimal args" in {
-    val d = Directive.withName("foo").withDecimalArg("val").build
+    val d = DirectiveDefinition.withName("foo").withDecimalArg("val").build
     assert(d.parameters(0).name == "val")
     assert(d.parameters(0).kind == DecimalArgument)
   }
 
   it should "allow a directive to repeat by default" in {
-    val d = Directive.withName("foo").build
+    val d = DirectiveDefinition.withName("foo").build
     assert(!d.allowOnce)
   }
 
   it should "allow a directive to not be repeated if only allowed once" in {
-    val d = Directive.withName("foo").allowOnce().build
+    val d = DirectiveDefinition.withName("foo").allowOnce().build
     assert(d.allowOnce)
   }
 
   it should "disallow arguments with null names" in {
     intercept[NullPointerException] {
-      Directive.withName("foo").withBoolArg(null)
+      DirectiveDefinition.withName("foo").withBoolArg(null)
     }
   }
 
   it should "disallow arguments with empty names" in {
     intercept[IllegalArgumentException] {
-      Directive.withName("foo").withIntArg("")
+      DirectiveDefinition.withName("foo").withIntArg("")
     }
   }
 }

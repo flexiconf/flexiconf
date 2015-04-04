@@ -5,7 +5,7 @@ import java.io.{FileWriter, File}
 import se.blea.flexiconf._
 import se.blea.flexiconf.docgen.MarkdownDocumentationGenerator
 
-object CLI {
+object ScalaCLI {
   def main(args: Array[String]): Unit = {
     val schemaOpts = SchemaOptions.withSourceFile("src/main/resources/sample_schema.conf")
     val schema = Parser.parseSchema(schemaOpts)
@@ -19,11 +19,11 @@ object CLI {
 
     println(config.get.renderTree)
 
-    val warnings = config.get.getWarnings
+    val warnings = config.get.warnings
 
     if (warnings.nonEmpty) {
       println("Warnings:")
-      println(config.get.getWarnings.mkString("- ", "\n- ", ""))
+      println(warnings.mkString("- ", "\n- ", ""))
     }
 
     val docs = new File("docs.html")

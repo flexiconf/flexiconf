@@ -10,7 +10,7 @@ import scala.collection.JavaConversions._
 /**
  * Base trait for argument types
  */
-sealed trait ArgumentType[T] {
+sealed trait ArgumentKind[T] {
   /** Returns true if the value meets the criteria for this type */
   def accepts(value: String): Boolean
 
@@ -22,14 +22,16 @@ sealed trait ArgumentType[T] {
 }
 
 
-/** Container for an argument value: value and type */
-case class Argument(value: String, kind: ArgumentType[_] = StringArgument) {
-  override def toString = s"$kind<$value>"
+/** Container for an argument value: name, value, and kind */
+case class Argument(value: String, 
+                    kind: ArgumentKind[_] = StringArgument,
+                    name: String = "?") {
+  override def toString = s"$name:$kind<$value>"
 }
 
 
 /** Boolean values */
-case object BoolArgument extends ArgumentType[Boolean] {
+case object BoolArgument extends ArgumentKind[Boolean] {
   val boolTruePattern = "on|yes|y|true"
   val boolFalsePattern = "off|no|n|false"
   val boolPattern = boolTruePattern ++ "|" ++ boolFalsePattern
@@ -41,7 +43,7 @@ case object BoolArgument extends ArgumentType[Boolean] {
 
 
 /** Integer values */
-case object IntArgument extends ArgumentType[Long] {
+case object IntArgument extends ArgumentKind[Long] {
   val intPattern = "0|[1-9]\\d*"
 
   override def accepts(value: String) = value matches intPattern
@@ -51,7 +53,7 @@ case object IntArgument extends ArgumentType[Long] {
 
 
 /** Decimal values */
-case object DecimalArgument extends ArgumentType[Double] {
+case object DecimalArgument extends ArgumentKind[Double] {
   val decimalPattern = "(0|[1-9]\\d*)(\\.\\d+)?"
 
   override def accepts(value: String) = value matches decimalPattern
@@ -61,7 +63,7 @@ case object DecimalArgument extends ArgumentType[Double] {
 
 
 /** Duration values */
-case object DurationArgument extends ArgumentType[Long] {
+case object DurationArgument extends ArgumentKind[Long] {
   val durationPattern = "((?:0|[1-9]\\d*)(?:\\.\\d+)?)(ms|s|m|h|d|w|M|y)".r
   val multipliers = Map("ms" -> 1l,
                         "s" -> 1000l,
@@ -82,7 +84,7 @@ case object DurationArgument extends ArgumentType[Long] {
 
 
 /** Percentage values */
-case object PercentageArgument extends ArgumentType[Double] {
+case object PercentageArgument extends ArgumentKind[Double] {
   val percentagePattern = "((?:0|[1-9]\\d*)(?:\\.\\d+)?)%".r
 
   override def accepts(value: String) = percentagePattern.pattern.matcher(value).matches
@@ -95,14 +97,14 @@ case object PercentageArgument extends ArgumentType[Double] {
 
 
 /** String values */
-case object StringArgument extends ArgumentType[String] {
+case object StringArgument extends ArgumentKind[String] {
   override def accepts(value: String) = true
   override def valueOf(value: String) = value
   override def toString = "String"
 }
 
 /** Unknown values */
-case object UnknownArgument extends ArgumentType[Unit] {
+case object UnknownArgument extends ArgumentKind[Unit] {
   override def accepts(value: String) = false
   override def valueOf(value: String) = throw new IllegalStateException("Can't get value of argument with unknown type")
   override def toString = "Unknown"

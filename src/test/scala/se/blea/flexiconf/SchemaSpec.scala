@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.{CommonTokenStream, ANTLRInputStream}
 import org.scalatest.{Matchers, FlatSpec}
 import se.blea.flexiconf.parser.gen.{SchemaParser, SchemaLexer}
 
-/** Test cases for  */
+/** Test cases for Schema */
 class SchemaSpec extends FlatSpec with Matchers {
   def schema(inputString: String) = {
     val bytes = inputString.getBytes
@@ -30,7 +30,7 @@ class SchemaSpec extends FlatSpec with Matchers {
       """
         |foo val:Int;
         |bar val:String;
-        |baz val:Decimal [allowMultiple];
+        |baz val:Decimal [once];
         |qux val:Bool;
       """.stripMargin)
 
