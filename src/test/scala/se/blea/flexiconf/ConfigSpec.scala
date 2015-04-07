@@ -15,15 +15,15 @@ trait ConfigHelpers {
 
   def defaultOptions = ConfigOptions.withSourceFile("test")
 
-  def node(d: Directive): DefaultConfigNode = DefaultConfigNode(d, List.empty, Source("-", 0, 0))
-  def node(n: String): DefaultConfigNode = node(Directive.withName(n).build)
+  def node(d: DirectiveDefinition): ConfigNode = ConfigNode(d, List.empty, Source("-", 0, 0))
+  def node(n: String): ConfigNode = node(DirectiveDefinition.withName(n).build)
 
-  def rootNode(ds: Directive*): DefaultConfigNode = node(Directive.root(ds:_*))
+  def rootNode(ds: DirectiveDefinition*): ConfigNode = node(DirectiveDefinition.root(ds:_*))
 
-  def makeStack(node: DefaultConfigNode) = Stack(List(node))
+  def makeStack(node: ConfigNode) = Stack(List(node))
 
   def visitor(opts: ConfigOptions): ConfigNodeVisitor = ConfigNodeVisitor(opts.visitorOpts)
-  def visitor(opts: ConfigOptions, stack: Stack[DefaultConfigNode]): ConfigNodeVisitor = ConfigNodeVisitor(opts.visitorOpts, stack)
+  def visitor(opts: ConfigOptions, stack: Stack[ConfigNode]): ConfigNodeVisitor = ConfigNodeVisitor(opts.visitorOpts, stack)
 
   def nodeWithSchema(inputString: String) = node(schema(inputString))
   def emptyStackWithSchema(inputString: String) = makeStack(nodeWithSchema(inputString))
@@ -104,7 +104,7 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "return a group directive node for groups" in {
     val ctx = parse("group my_group { foo 123; }")
-    val root = node(Directive.root())
+    val root = node(DirectiveDefinition.root())
     val result = visitor(defaultOptions, makeStack(root)).visitDirective(ctx.directive())
 
     assert(result.get.name == "$group")
@@ -223,14 +223,19 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
   }
 }
 
+class ConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
+
+
+}
+
 
 /** Test cases for config parsing */
-class ConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
+class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "prevent mismatching arguments for parameters" in {
     intercept[IllegalStateException] {
-      val d = Directive.withName("foo").withIntArg("val").build
-      val node = DefaultConfigNode(d, List(StringArgument("123")), Source("test", 1, 0))
+      val d = DirectiveDefinition.withName("foo").withIntArg("val").build
+      val node = ConfigNode(d, List(StringArgument("123")), Source("test", 1, 0))
     }
   }
 
@@ -240,8 +245,8 @@ class ConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "identify whether the node is for a built-in directive" in {
     val node1 = node("foobar")
-    val node2 = node(Directive.root())
-    val node3 = node(Directive.withUnsafeName("$foo").build)
+    val node2 = node(DirectiveDefinition.root())
+    val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
 
     assert(!node1.isInternalNode)
     assert(node2.isInternalNode)
@@ -250,8 +255,8 @@ class ConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "identify whether the node is for a root directive" in {
     val node1 = node("foobar")
-    val node2 = node(Directive.root())
-    val node3 = node(Directive.withUnsafeName("$foo").build)
+    val node2 = node(DirectiveDefinition.root())
+    val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
 
     assert(!node1.isRootNode)
     assert(node2.isRootNode)
@@ -260,8 +265,8 @@ class ConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "identify whether the node is for a user directive" in {
     val node1 = node("foobar")
-    val node2 = node(Directive.root())
-    val node3 = node(Directive.withUnsafeName("$foo").build)
+    val node2 = node(DirectiveDefinition.root())
+    val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
 
     assert(node1.isUserNode)
     assert(node2.isUserNode)

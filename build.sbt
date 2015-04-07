@@ -18,7 +18,7 @@ antlr4GenVisitor in Antlr4 := true
 testOptions in Test += Tests.Argument("-oD")
 
 // Run Options
-mainClass in (Compile, run) := Some("se.blea.flexiconf.cli.CLI")
+mainClass in (Compile, run) := Some("se.blea.flexiconf.cli.JavaCLI")
 
 // Publish Options
 publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/.m2/repository")))

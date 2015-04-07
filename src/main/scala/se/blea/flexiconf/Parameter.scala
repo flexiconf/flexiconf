@@ -7,18 +7,18 @@ import se.blea.flexiconf.parser.gen.SchemaParserBaseVisitor
 import scala.collection.JavaConversions._
 
 /** Container for defining the arguments a directive accepts: requires a name and type */
-case class Parameter(name: String, kind: ArgumentType[_] = StringArgument) {
+case class Parameter(name: String, kind: ArgumentKind[_] = StringArgument) {
   override def toString = s"$name:$kind"
 }
 
 /** Returns an ArgumentType for supported parameter types */
-private[flexiconf] object ParameterTypeVisitor extends SchemaParserBaseVisitor[ArgumentType[_]] {
-  override def visitStringType(ctx: StringTypeContext): ArgumentType[_] = StringArgument
-  override def visitIntegerType(ctx: IntegerTypeContext): ArgumentType[_] = IntArgument
-  override def visitBooleanType(ctx: BooleanTypeContext): ArgumentType[_] = BoolArgument
-  override def visitDecimalType(ctx: DecimalTypeContext): ArgumentType[_] = DecimalArgument
-  override def visitDurationType(ctx: DurationTypeContext): ArgumentType[_] = DurationArgument
-  override def visitPercentageType(ctx: PercentageTypeContext): ArgumentType[_] = PercentageArgument
+private[flexiconf] object ParameterTypeVisitor extends SchemaParserBaseVisitor[ArgumentKind[_]] {
+  override def visitStringType(ctx: StringTypeContext): ArgumentKind[_] = StringArgument
+  override def visitIntegerType(ctx: IntegerTypeContext): ArgumentKind[_] = IntArgument
+  override def visitBooleanType(ctx: BooleanTypeContext): ArgumentKind[_] = BoolArgument
+  override def visitDecimalType(ctx: DecimalTypeContext): ArgumentKind[_] = DecimalArgument
+  override def visitDurationType(ctx: DurationTypeContext): ArgumentKind[_] = DurationArgument
+  override def visitPercentageType(ctx: PercentageTypeContext): ArgumentKind[_] = PercentageArgument
 }
 
 /** Returns a Parameter for a given single or list of ParameterContext */

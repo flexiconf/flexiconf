@@ -13,7 +13,7 @@ trait SchemaNode {
   def flags: Set[DirectiveFlag]
   def documentation: String
   def children: List[SchemaNode]
-  def toDirectives: Set[Directive]
+  def toDirectives: Set[DirectiveDefinition]
 }
 
 case class Schema(private val rawSchema: DefaultSchemaNode) extends SchemaNode {
@@ -25,7 +25,7 @@ case class Schema(private val rawSchema: DefaultSchemaNode) extends SchemaNode {
   override def source: Source = schema.source
   override def documentation: String = schema.documentation
   override def flags: Set[DirectiveFlag] = schema.flags
-  override def toDirectives: Set[Directive] = schema.toDirectives
+  override def toDirectives: Set[DirectiveDefinition] = schema.toDirectives
 }
 
 private[flexiconf] case class DefaultSchemaNode(name: String,
@@ -50,7 +50,7 @@ private[flexiconf] case class DefaultSchemaNode(name: String,
     }
   }
 
-  override def toDirectives: Set[Directive] = {
+  override def toDirectives: Set[DirectiveDefinition] = {
     children.map(_.toDirective).toSet
   }
 
@@ -66,8 +66,8 @@ private[flexiconf] case class DefaultSchemaNode(name: String,
   }
 
   /** Convert this SchemaNode to a tree of directives */
-  def toDirective: Directive = {
-    Directive.withUnsafeName(name)
+  def toDirective: DirectiveDefinition = {
+    DirectiveDefinition.withUnsafeName(name)
       .withParameters(parameters)
       .withFlags(flags)
       .withDocumentation(documentation)
