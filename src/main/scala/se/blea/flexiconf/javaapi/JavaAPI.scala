@@ -54,12 +54,12 @@ class Directive(private val _directive: se.blea.flexiconf.Directive) {
     .map(new Directive(_))
     .orNull
 
-  def getBoolArg(name: String): Boolean = _directive.boolArg(name)
-  def getPercentageArg(name: String): Double = _directive.percentageArg(name)
-  def getDecimalArg(name: String): Double = _directive.decimalArg(name)
-  def getStringArg(name: String): String = _directive.stringArg(name)
-  def getIntArg(name: String): Long = _directive.intArg(name)
-  def getDurationArg(name: String): Long = _directive.durationArg(name)
+  def getBoolArg(name: String): java.lang.Boolean = _directive.boolArg(name)
+  def getPercentageArg(name: String): java.lang.Double = _directive.percentageArg(name)
+  def getDecimalArg(name: String): java.lang.Double = _directive.decimalArg(name)
+  def getStringArg(name: String): java.lang.String = _directive.stringArg(name)
+  def getIntArg(name: String): java.lang.Long = _directive.intArg(name)
+  def getDurationArg(name: String): java.lang.Long = _directive.durationArg(name)
 }
 
 /** Java-friendly wrapper for the Argument API */
