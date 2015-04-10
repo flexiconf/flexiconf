@@ -150,6 +150,27 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     }
   }
 
+  it should "allow nested directives to be repeated across different scopes (no duplicate directive exception)" in {
+    val stack = emptyStackWithSchema(
+      """
+        | outer {
+        |   inner { single val:Int [once]; }
+        | }
+      """.stripMargin)
+
+    val ctx = parse(
+      """
+        | group ref {
+        |   inner { single 123; }
+        | }
+        |
+        | outer { use ref; }
+        | outer { use ref; }
+      """.stripMargin)
+
+    visitor(defaultOptions, stack).visitDocument(ctx.document())
+  }
+
 
   behavior of "#visitUserDirective"
 
