@@ -2,13 +2,10 @@ package se.blea.flexiconf.docgen
 
 import org.pegdown.PegDownProcessor
 import se.blea.flexiconf.DirectiveFlags.AllowOnce
-import se.blea.flexiconf.{DirectiveFlags, SchemaNode}
+import se.blea.flexiconf.SchemaNode
 
-trait DocumentationGenerator {
-  def process(node: SchemaNode): String
-}
-
-object MarkdownDocumentationGenerator extends DocumentationGenerator {
+/** Documentation generator that parses doc comments as markdown and creates HTML */
+object MarkdownDocGenerator extends DocGenerator {
   lazy val processor = new PegDownProcessor()
 
   override def process(node: SchemaNode): String = {

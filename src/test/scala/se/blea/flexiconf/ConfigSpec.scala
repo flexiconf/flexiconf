@@ -22,8 +22,8 @@ trait ConfigHelpers {
 
   def makeStack(node: ConfigNode) = Stack(List(node))
 
-  def visitor(opts: ConfigOptions): ConfigNodeVisitor = ConfigNodeVisitor(opts.visitorOpts)
-  def visitor(opts: ConfigOptions, stack: Stack[ConfigNode]): ConfigNodeVisitor = ConfigNodeVisitor(opts.visitorOpts, stack)
+  def visitor(opts: ConfigOptions): ConfigVisitor = ConfigVisitor(opts.visitorOpts)
+  def visitor(opts: ConfigOptions, stack: Stack[ConfigNode]): ConfigVisitor = ConfigVisitor(opts.visitorOpts, stack)
 
   def nodeWithSchema(inputString: String) = node(schema(inputString))
   def emptyStackWithSchema(inputString: String) = makeStack(nodeWithSchema(inputString))
@@ -37,7 +37,7 @@ trait ConfigHelpers {
     val document = parser.document()
 
     val opts = SchemaVisitorOptions("test")
-    val visitor = new SchemaNodeVisitor(opts)
+    val visitor = new SchemaVisitor(opts)
 
     visitor.visitDocument(document).get.toDirective
   }

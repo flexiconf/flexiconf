@@ -17,7 +17,7 @@ class SchemaSpec extends FlatSpec with Matchers {
     val document = parser.document()
 
     val opts = SchemaVisitorOptions("test")
-    val visitor = new SchemaNodeVisitor(opts)
+    val visitor = new SchemaVisitor(opts)
 
     visitor.visitDocument(document)
   }

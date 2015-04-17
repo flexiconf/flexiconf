@@ -1,9 +1,9 @@
 package se.blea.flexiconf.cli
 
-import java.io.{FileWriter, File}
+import java.io.{File, FileWriter}
 
 import se.blea.flexiconf._
-import se.blea.flexiconf.docgen.MarkdownDocumentationGenerator
+import se.blea.flexiconf.docgen.MarkdownDocGenerator
 
 object ScalaCLI {
   def main(args: Array[String]): Unit = {
@@ -28,7 +28,7 @@ object ScalaCLI {
 
     val docs = new File("docs.html")
     val writer = new FileWriter(docs)
-    writer.write(MarkdownDocumentationGenerator.process(schema.get))
+    writer.write(MarkdownDocGenerator.process(schema.get))
     writer.close()
 
     // ConfigNode defaults = config.get("defaults");                               // get() for a single directive returns the node
