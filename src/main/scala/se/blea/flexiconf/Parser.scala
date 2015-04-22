@@ -28,8 +28,7 @@ object Parser {
   }
 
   def parseConfig(opts: ConfigOptions): Option[DefaultConfig] = {
-    val createStream = { Parser.streamFromSourceFile(opts.sourceFile) }
-    val parser = antlrConfigParserFromStream(opts.inputStream getOrElse createStream)
+    val parser = antlrConfigParserFromStream(opts.inputStream getOrElse Parser.streamFromSourceFile(opts.sourceFile))
 
     ConfigVisitor(opts.visitorOpts)
       .visit(parser.document)
@@ -45,8 +44,7 @@ object Parser {
   }
 
   def parseSchema(opts: SchemaOptions): Option[Schema] = {
-    val createStream = { Parser.streamFromSourceFile(opts.sourceFile) }
-    val parser = antlrSchemaParserFromStream(opts.inputStream getOrElse createStream)
+    val parser = antlrSchemaParserFromStream(opts.inputStream getOrElse Parser.streamFromSourceFile(opts.sourceFile))
 
     SchemaVisitor(opts.visitorOpts)
       .visit(parser.document)
