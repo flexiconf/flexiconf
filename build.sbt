@@ -1,5 +1,11 @@
 scalaVersion := "2.11.2"
 
+organization := "se.blea"
+version := "0.1-SNAPSHOT"
+
+javacOptions ++= Seq("-target", "1.7")
+scalacOptions += "-target:jvm-1.7"
+
 // Runtime Dependencies
 libraryDependencies += "org.pegdown" % "pegdown" % "1.5.0"
 libraryDependencies += "com.google.guava" % "guava" % "18.0"
