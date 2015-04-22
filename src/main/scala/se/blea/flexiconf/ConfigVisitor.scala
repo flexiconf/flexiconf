@@ -9,17 +9,16 @@ import scala.collection.JavaConversions._
 
 /** Converts ASTs from ANTLR into usable configuration trees */
 private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
-                                           stack: Stack[ConfigNode] = Stack.empty,
-                                           context: ConfigVisitorContext = ConfigVisitorContext())
+                                       stack: Stack[ConfigVisitorContext] = Stack.empty)
   extends ConfigBaseVisitor[Option[ConfigNode]] {
 
   /** Entry point for a configuration file */
   override def visitDocument(ctx: DocumentContext): Option[ConfigNode] = {
-    val root = stack.peek.map(_.directive) getOrElse DirectiveDefinition.root(options.directives)
-    val arguments = stack.peek.map(_.arguments).getOrElse(List.empty)
+    val root = stack.peek.map(_.node.directive) getOrElse DirectiveDefinition.root(options.directives)
+    val arguments = stack.peek.map(_.node.arguments).getOrElse(List.empty)
     val document = ConfigNode(root, arguments, sourceFromContext(ctx))
 
-    stack.enterFrame(document) {
+    stack.enterFrame(ConfigVisitorContext(document)) {
       Some(document.copy(children = visitDirectives(ctx.directiveList())))
     }
   }
@@ -27,13 +26,13 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
   /** Resolves all included files and parses them, adding new directives to the configuration tree */
   override def visitInclude(ctx: IncludeContext): Option[ConfigNode] = {
     val pattern = ctx.stringArgument.getText
-    val allowedDirectives = stack.peek.map(_.allowedDirectives).getOrElse(Set.empty)
+    val allowedDirectives = stack.peek.map(_.node.allowedDirectives).getOrElse(Set.empty)
     val inputStream = Parser.streamFromSourceFile(pattern)
     val parser = Parser.antlrConfigParserFromStream(inputStream)
     val node = ConfigNode(DirectiveDefinition.include(allowedDirectives), ArgumentVisitor(ctx.stringArgument), sourceFromContext(ctx))
 
-    stack.enterFrame(node) {
-      ConfigVisitor(options.copy(sourceFile = pattern), stack, context).visitDocument(parser.document()) map { list =>
+    stack.enterFrame(ConfigVisitorContext(node)) {
+      ConfigVisitor(options.copy(sourceFile = pattern), stack).visitDocument(parser.document()) map { list =>
         node.copy(arguments = List(Argument(pattern)), children = list.children)
       }
     }
@@ -54,7 +53,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
   /** Inserts the directive list specified by the given group if it exists */
   override def visitUse(ctx: UseContext): Option[ConfigNode] = {
     val name = ctx.stringArgument.getText
-    val allowedDirectives = stack.peek.map(_.allowedDirectives).getOrElse(Set.empty)
+    val allowedDirectives = stack.peek.map(_.node.allowedDirectives).getOrElse(Set.empty)
     val use = ConfigNode(DirectiveDefinition.use(allowedDirectives),
       ArgumentVisitor(ctx.stringArgument),
       sourceFromContext(ctx))
@@ -79,7 +78,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
     val name = ctx.directiveName.getText
     val source = sourceFromContext(ctx)
     val arguments = ArgumentVisitor(ctx.argumentList)
-    val allowedDirectives = stack.peek.map(_.allowedDirectives).getOrElse(Set.empty)
+    val allowedDirectives = stack.peek.map(_.node.allowedDirectives).getOrElse(Set.empty)
     val maybeDirective = MaybeDirective(name, arguments, hasBlock = ctx.directiveList != null)
 
     // Determine if the directive can be matched
@@ -105,7 +104,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
       addDirective(directive)
 
       // Enter a new frame and parse all children (if any)
-      stack.enterFrame(node) {
+      stack.enterFrame(ConfigVisitorContext(node)) {
         node.copy(children = visitDirectives(ctx.directiveList()))
       }
     } orElse {
@@ -127,28 +126,24 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
 
   /** Associate a named group of directives with the closest, non-internal node or the root node */
   def addGroup(name: String, directives: DirectiveListContext) = {
-    context.addGroup(stack.find(_.isUserNode).get, name, directives)
+    stack.find(_.node.isUserNode).map(_.withGroup(name, directives))
   }
 
   /** Associate a directive with the closest, non-internal node or the root node */
   def addDirective(directive: DirectiveDefinition) = {
-    context.addDirective(stack.find(_.isUserNode).get, directive)
+    stack.find(_.node.isUserNode).map(_.withDirective(directive))
   }
 
   /** Finds a saved group of directives in the current stack */
   def findGroup(name: String): Option[DirectiveListContext] = {
-    stack.filter(_.isUserNode).find { f =>
-      context.groupsByNode.get(f).exists(_.contains(name))
-    } flatMap { f =>
-      context.groupsByNode(f).get(name)
-    }
+    stack.find { ctx =>
+      ctx.node.isUserNode && ctx.groups.contains(name)
+    }.flatMap(_.groups.get(name))
   }
 
   /** Returns true if the directives associated with the nearest non-internal or root node */
   def directiveAlreadyExists(directive: DirectiveDefinition): Boolean = {
-    stack.find(_.isUserNode).exists { f =>
-      context.directivesByNode.get(f).exists(_.contains(directive))
-    }
+    stack.find(_.node.isUserNode).exists(_.directives.contains(directive))
   }
 
   /** Returns a new Source object based on the provided context */
@@ -160,6 +155,5 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
 /** Companion for ConfigNodeVisitor */
 private[flexiconf] object ConfigVisitor {
   def apply(opts: ConfigVisitorOptions,
-            stack: Stack[ConfigNode] = Stack.empty,
-            context: ConfigVisitorContext = ConfigVisitorContext()) = new ConfigVisitor(opts, stack, context)
+            stack: Stack[ConfigVisitorContext] = Stack.empty) = new ConfigVisitor(opts, stack)
 }

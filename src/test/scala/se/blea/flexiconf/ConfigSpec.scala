@@ -20,10 +20,10 @@ trait ConfigHelpers {
 
   def rootNode(ds: DirectiveDefinition*): ConfigNode = node(DirectiveDefinition.root(ds:_*))
 
-  def makeStack(node: ConfigNode) = Stack(List(node))
+  def makeStack(node: ConfigNode) = Stack(List(new ConfigVisitorContext(node)))
 
   def visitor(opts: ConfigOptions): ConfigVisitor = ConfigVisitor(opts.visitorOpts)
-  def visitor(opts: ConfigOptions, stack: Stack[ConfigNode]): ConfigVisitor = ConfigVisitor(opts.visitorOpts, stack)
+  def visitor(opts: ConfigOptions, stack: Stack[ConfigVisitorContext]): ConfigVisitor = ConfigVisitor(opts.visitorOpts, stack)
 
   def nodeWithSchema(inputString: String) = node(schema(inputString))
   def emptyStackWithSchema(inputString: String) = makeStack(nodeWithSchema(inputString))
