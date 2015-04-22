@@ -34,17 +34,20 @@ public class JavaCLI {
 
         System.out.println(config.renderTree());
         System.out.println(config.getWarnings().size());
-        config.getWarnings().forEach(System.out::println);
+
+        for (String warning : config.getWarnings()) {
+            System.out.println(warning);
+        }
     }
 
     private static void printArgs(List<Directive> nodes) {
-        nodes.forEach((node) -> {
+        for (Directive node : nodes) {
             System.out.println(node.getName());
-            node.getArgs().forEach((arg) -> {
+            for (Argument arg : node.getArgs()) {
                 System.out.println(String.format(">> %s: %s", arg.getName(), arg.getKind()));
-            });
+            }
 
             printArgs(node.getDirectives());
-        });
+        }
     }
 }
