@@ -1,17 +1,10 @@
 package se.blea.flexiconf
 
-import java.io.{File, InputStream}
+import java.io.{FileNotFoundException, File, InputStream}
 
 import org.antlr.v4.runtime.{ANTLRInputStream, CommonTokenStream}
 import org.apache.commons.io.FileUtils
 import se.blea.flexiconf.parser.gen.{ConfigLexer, ConfigParser, SchemaLexer, SchemaParser}
-
-
-
-
-
-
-
 
 
 object Parser {
@@ -23,12 +16,17 @@ object Parser {
     new ConfigParser(tokens)
   }
 
-  private[flexiconf] def streamFromSourceFile(sourceFile: String): InputStream = {
-    FileUtils.openInputStream(new File(sourceFile))
+  private[flexiconf] def streamFromSourceFile(sourceFile: String): Option[InputStream] = {
+    try {
+      Some(FileUtils.openInputStream(new File(sourceFile)))
+    } catch {
+      case e: FileNotFoundException => None
+    }
   }
 
-  def parseConfig(opts: ConfigOptions): Option[DefaultConfig] = {
-    val parser = antlrConfigParserFromStream(opts.inputStream getOrElse Parser.streamFromSourceFile(opts.sourceFile))
+  def parseConfig(opts: ConfigOptions): Option[Config] = {
+    val stream = opts.inputStream orElse Parser.streamFromSourceFile(opts.sourceFile)
+    val parser = antlrConfigParserFromStream(stream.get)
 
     ConfigVisitor(opts.visitorOpts)
       .visit(parser.document)
@@ -44,7 +42,8 @@ object Parser {
   }
 
   def parseSchema(opts: SchemaOptions): Option[Schema] = {
-    val parser = antlrSchemaParserFromStream(opts.inputStream getOrElse Parser.streamFromSourceFile(opts.sourceFile))
+    val stream = opts.inputStream orElse Parser.streamFromSourceFile(opts.sourceFile)
+    val parser = antlrSchemaParserFromStream(stream.get)
 
     SchemaVisitor(opts.visitorOpts)
       .visit(parser.document)

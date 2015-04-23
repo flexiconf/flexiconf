@@ -6,6 +6,8 @@ trait Config {
   def directives: List[Directive]
   def warnings: List[String]
   def renderTree: String
+  
+  private[flexiconf] def renderDebugTree: String
 }
 
 
