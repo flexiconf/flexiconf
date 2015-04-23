@@ -26,6 +26,11 @@ lazy val antlr4ConfigSettings = Seq(
   unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "antlr4"
 )
 
+//Publish settings
+publishArtifact := false
+
+publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/.m2/repository")))
+
 lazy val publishSettings = Seq(
   publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/.m2/repository")))
 )
