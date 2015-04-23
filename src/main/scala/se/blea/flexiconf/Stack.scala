@@ -34,6 +34,9 @@ case class Stack[T](private var frames: List[T] = List.empty) {
   /** Filter frames **/
   def filter(p: (T) => Boolean) = frames.filter(p)
 
+  /** Replace a frame **/
+  def replace(p: T, u: T): Unit = frames = frames.patch(frames.indexOf(p), Seq(u), 1)
+
   /** Return string representation of the stack for debugging */
   def render = frames.mkString("* ", "\n* ", "\n")
 }

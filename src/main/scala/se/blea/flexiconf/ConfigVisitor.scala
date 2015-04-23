@@ -126,12 +126,16 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
 
   /** Associate a named group of directives with the closest, non-internal node or the root node */
   def addGroup(name: String, directives: DirectiveListContext) = {
-    stack.find(_.node.isUserNode).map(_.withGroup(name, directives))
+    stack.find(_.node.isUserNode) map { ctx =>
+      stack.replace(ctx, ctx.withGroup(name, directives))
+    }
   }
 
   /** Associate a directive with the closest, non-internal node or the root node */
   def addDirective(directive: DirectiveDefinition) = {
-    stack.find(_.node.isUserNode).map(_.withDirective(directive))
+    stack.find(_.node.isUserNode) map { ctx =>
+      stack.replace(ctx, ctx.withDirective(directive))
+    }
   }
 
   /** Finds a saved group of directives in the current stack */
