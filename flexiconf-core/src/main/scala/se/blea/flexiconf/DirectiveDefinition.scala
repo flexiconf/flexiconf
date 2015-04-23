@@ -6,7 +6,7 @@ import scala.annotation.varargs
  * Defines the name, parameters, and allowed child directives for a configuration directive
  *
  * User-defined directive names must match the pattern "[a-zA-Z]\w+" so that they can be identified separately
- * from built-in directives that start with '$' (e.g. $root, $use, $group, $include).
+ * from built-in directives that start with '$' (e.g. \$root, \$use, \$group, \$include).
  */
 case class DirectiveDefinition private[flexiconf](private[flexiconf] val name: String,
                                                   private[flexiconf] val parameters: List[Parameter] = List.empty,
