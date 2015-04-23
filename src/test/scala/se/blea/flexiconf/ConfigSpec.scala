@@ -93,7 +93,11 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
       val directives = schema("directive arg1:String arg2:String [once];")
       val ctx = parse(s"directive faz qux; include $conf;")
 
-      val result = visitor(defaultOptions.ignoreUnknownDirectives.withDirectives(directives.children)).visitDocument(ctx.document())
+      val opts = defaultOptions
+        .ignoreUnknownDirectives
+        .withDirectives(directives.children)
+
+      val result = visitor(opts).visitDocument(ctx.document())
       println(result.get.renderTree())
       println(result.get.collapse.renderTree())
     }
