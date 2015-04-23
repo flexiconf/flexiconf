@@ -20,10 +20,10 @@ trait ConfigHelpers {
 
   def rootNode(ds: DirectiveDefinition*): ConfigNode = node(DirectiveDefinition.root(ds:_*))
 
-  def makeStack(node: ConfigNode) = Stack(List(node))
+  def makeStack(node: ConfigNode) = Stack(List(new ConfigVisitorContext(node)))
 
   def visitor(opts: ConfigOptions): ConfigVisitor = ConfigVisitor(opts.visitorOpts)
-  def visitor(opts: ConfigOptions, stack: Stack[ConfigNode]): ConfigVisitor = ConfigVisitor(opts.visitorOpts, stack)
+  def visitor(opts: ConfigOptions, stack: Stack[ConfigVisitorContext]): ConfigVisitor = ConfigVisitor(opts.visitorOpts, stack)
 
   def nodeWithSchema(inputString: String) = node(schema(inputString))
   def emptyStackWithSchema(inputString: String) = makeStack(nodeWithSchema(inputString))
@@ -93,7 +93,11 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
       val directives = schema("directive arg1:String arg2:String [once];")
       val ctx = parse(s"directive faz qux; include $conf;")
 
-      val result = visitor(defaultOptions.ignoreUnknownDirectives.withDirectives(directives.children)).visitDocument(ctx.document())
+      val opts = defaultOptions
+        .ignoreUnknownDirectives
+        .withDirectives(directives.children)
+
+      val result = visitor(opts).visitDocument(ctx.document())
       println(result.get.renderTree())
       println(result.get.collapse.renderTree())
     }
@@ -148,6 +152,27 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
 
       val result = visitor(defaultOptions, stack).visitDocument(ctx.document())
     }
+  }
+
+  it should "allow nested directives to be repeated across different scopes (no duplicate directive exception)" in {
+    val stack = emptyStackWithSchema(
+      """
+        | outer {
+        |   inner { single val:Int [once]; }
+        | }
+      """.stripMargin)
+
+    val ctx = parse(
+      """
+        | group ref {
+        |   inner { single 123; }
+        | }
+        |
+        | outer { use ref; }
+        | outer { use ref; }
+      """.stripMargin)
+
+    visitor(defaultOptions, stack).visitDocument(ctx.document())
   }
 
 
