@@ -39,7 +39,6 @@ lazy val `flexiconf-core` = project.in(file("flexiconf-core"))
   .settings(commonDependencies:_*)
   .settings(
     libraryDependencies += "org.pegdown" % "pegdown" % "1.5.0",
-    libraryDependencies += "com.google.guava" % "guava" % "18.0",
     libraryDependencies += "commons-io" % "commons-io" % "2.4")
 
 lazy val `flexiconf-docgen` = project.in(file("flexiconf-docgen"))
