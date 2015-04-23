@@ -15,7 +15,7 @@ trait ConfigHelpers {
 
   def defaultOptions = ConfigOptions.withSourceFile("test")
 
-  def node(d: DirectiveDefinition): ConfigNode = ConfigNode(d, List.empty, Source("-", 0, 0))
+  def node(d: DirectiveDefinition): ConfigNode = ConfigNode(d, List.empty, Source("", 0, 0))
   def node(n: String): ConfigNode = node(DirectiveDefinition.withName(n).build)
 
   def rootNode(ds: DirectiveDefinition*): ConfigNode = node(DirectiveDefinition.root(ds:_*))
@@ -91,7 +91,7 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     intercept[IllegalStateException] {
       val conf = SampleConfigs.BASIC_TREE
       val directives = schema("directive arg1:String arg2:String [once];")
-      val ctx = parse(s"directive faz qux; include $conf;")
+      val ctx = parse(s"directive faz qux; include ../$conf;")
 
       val opts = defaultOptions
         .ignoreUnknownDirectives
