@@ -156,7 +156,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
 
   /** Resolve a file path for includes based on the location of the current file **/
   def resolveIncludePath(basePath: String, path: String) = {
-    Paths.get(basePath).resolve(path).normalize.toString
+    Paths.get(basePath).resolveSibling(path).normalize.toString
   }
 
   /** Returns a new Source object based on the provided context */
