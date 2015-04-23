@@ -1,60 +1,11 @@
 package se.blea.flexiconf
 
-import java.io.{FileNotFoundException, ByteArrayInputStream}
+import java.io.{File, FileNotFoundException}
 
-import org.antlr.v4.runtime.{CommonTokenStream, ANTLRInputStream}
-import org.scalatest.{Matchers, FlatSpec}
-import se.blea.flexiconf.parser.gen.{SchemaLexer, SchemaParser, ConfigParser, ConfigLexer}
-
-/** Helper methods for working with config parsers */
-trait ConfigHelpers {
-
-  object SampleConfigs {
-    val BASIC_TREE = "flexiconf-core/src/test/resources/config/parser_test/basic_tree.conf"
-  }
-
-  def defaultOptions = ConfigOptions.withSourceFile("test")
-
-  def node(d: DirectiveDefinition): ConfigNode = ConfigNode(d, List.empty, Source("-", 0, 0))
-  def node(n: String): ConfigNode = node(DirectiveDefinition.withName(n).build)
-
-  def rootNode(ds: DirectiveDefinition*): ConfigNode = node(DirectiveDefinition.root(ds:_*))
-
-  def makeStack(node: ConfigNode) = Stack(List(new ConfigVisitorContext(node)))
-
-  def visitor(opts: ConfigOptions): ConfigVisitor = ConfigVisitor(opts.visitorOpts)
-  def visitor(opts: ConfigOptions, stack: Stack[ConfigVisitorContext]): ConfigVisitor = ConfigVisitor(opts.visitorOpts, stack)
-
-  def nodeWithSchema(inputString: String) = node(schema(inputString))
-  def emptyStackWithSchema(inputString: String) = makeStack(nodeWithSchema(inputString))
-
-  def schema(inputString: String) = {
-    val bytes = inputString.getBytes
-    val input = new ANTLRInputStream(new ByteArrayInputStream(bytes))
-    val lexer = new SchemaLexer(input)
-    val tokens = new CommonTokenStream(lexer)
-    val parser = new SchemaParser(tokens)
-    val document = parser.document()
-
-    val opts = SchemaVisitorOptions("test")
-    val visitor = new SchemaVisitor(opts)
-
-    visitor.visitDocument(document).get.toDirective
-  }
-
-  def parse(inputString: String) = {
-    val bytes = inputString.getBytes
-    val input = new ANTLRInputStream(new ByteArrayInputStream(bytes))
-    val lexer = new ConfigLexer(input)
-    val tokens = new CommonTokenStream(lexer)
-
-    new ConfigParser(tokens)
-  }
-}
-
+import org.scalatest.{FlatSpec, Matchers}
 
 /** Test cases for config parsing */
-class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
+class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   behavior of "#sourceFromContext"
 
@@ -80,6 +31,16 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     assert(result.get.arguments(0).value == conf)
   }
 
+  it should "resolve absolute file include paths" in {
+    val conf = SampleConfigs.BASIC_TREE
+    val absPath = new File(".").toPath.toAbsolutePath.normalize.toString + "/" + conf
+    val ctx = parse(s"include $absPath;")
+    val result = visitor(defaultOptions.ignoreUnknownDirectives).visitDirective(ctx.directive())
+
+    assert(result.get.name == "$include")
+    assert(result.get.arguments(0).value == absPath)
+  }
+
   it should "throw an exception when an included file can't be found" in {
     intercept[FileNotFoundException] {
       val ctx = parse("include foo/bar/baz_*.conf;")
@@ -98,8 +59,6 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
         .withDirectives(directives.children)
 
       val result = visitor(opts).visitDocument(ctx.document())
-      println(result.get.renderTree())
-      println(result.get.collapse.renderTree())
     }
   }
 
@@ -245,56 +204,5 @@ class ConfigNodeVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     assert(result(0).name == "foo")
     assert(result(0).arguments(0).value == "123")
     assert(result(1).name == "bar")
-  }
-}
-
-class ConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
-
-
-}
-
-
-/** Test cases for config parsing */
-class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
-
-  it should "prevent mismatching arguments for parameters" in {
-    intercept[IllegalStateException] {
-      val d = DirectiveDefinition.withName("foo").withIntArg("val").build
-      val node = ConfigNode(d, List(StringArgument("123")), Source("test", 1, 0))
-    }
-  }
-
-  it should "take the name of the provided directive" in {
-    assert(node("foobar").name == "foobar")
-  }
-
-  it should "identify whether the node is for a built-in directive" in {
-    val node1 = node("foobar")
-    val node2 = node(DirectiveDefinition.root())
-    val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
-
-    assert(!node1.isInternalNode)
-    assert(node2.isInternalNode)
-    assert(node3.isInternalNode)
-  }
-
-  it should "identify whether the node is for a root directive" in {
-    val node1 = node("foobar")
-    val node2 = node(DirectiveDefinition.root())
-    val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
-
-    assert(!node1.isRootNode)
-    assert(node2.isRootNode)
-    assert(!node3.isRootNode)
-  }
-
-  it should "identify whether the node is for a user directive" in {
-    val node1 = node("foobar")
-    val node2 = node(DirectiveDefinition.root())
-    val node3 = node(DirectiveDefinition.withUnsafeName("$foo").build)
-
-    assert(node1.isUserNode)
-    assert(node2.isUserNode)
-    assert(!node3.isUserNode)
   }
 }

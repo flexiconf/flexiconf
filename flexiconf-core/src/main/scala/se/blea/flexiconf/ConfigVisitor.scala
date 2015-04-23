@@ -1,5 +1,7 @@
 package se.blea.flexiconf
 
+import java.nio.file.Paths
+
 import org.antlr.v4.runtime.ParserRuleContext
 import se.blea.flexiconf.parser.gen.ConfigBaseVisitor
 import se.blea.flexiconf.parser.gen.ConfigParser._
@@ -25,15 +27,17 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
 
   /** Resolves all included files and parses them, adding new directives to the configuration tree */
   override def visitInclude(ctx: IncludeContext): Option[ConfigNode] = {
-    val pattern = ctx.stringArgument.getText
+    val includePattern = ctx.stringArgument.getText
+    val currentPath = stack.peek.map(_.node.source.sourceFile).getOrElse("")
+    val includePath = resolveIncludePath(currentPath, includePattern)
     val allowedDirectives = stack.peek.map(_.node.allowedDirectives).getOrElse(Set.empty)
-    val inputStream = Parser.streamFromSourceFile(pattern)
+    val inputStream = Parser.streamFromSourceFile(includePath)
     val parser = Parser.antlrConfigParserFromStream(inputStream)
     val node = ConfigNode(DirectiveDefinition.include(allowedDirectives), ArgumentVisitor(ctx.stringArgument), sourceFromContext(ctx))
 
     stack.enterFrame(ConfigVisitorContext(node)) {
-      ConfigVisitor(options.copy(sourceFile = pattern), stack).visitDocument(parser.document()) map { list =>
-        node.copy(arguments = List(Argument(pattern)), children = list.children)
+      ConfigVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>
+        node.copy(arguments = List(Argument(includePath)), children = list.children)
       }
     }
   }
@@ -148,6 +152,11 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
   /** Returns true if the directives associated with the nearest non-internal or root node */
   def directiveAlreadyExists(directive: DirectiveDefinition): Boolean = {
     stack.find(_.node.isUserNode).exists(_.directives.contains(directive))
+  }
+
+  /** Resolve a file path for includes based on the location of the current file **/
+  def resolveIncludePath(basePath: String, path: String) = {
+    Paths.get(basePath).resolveSibling(path).normalize.toString
   }
 
   /** Returns a new Source object based on the provided context */
