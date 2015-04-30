@@ -1,7 +1,5 @@
 package se.blea.flexiconf
 
-import java.nio.file.Paths
-
 import org.antlr.v4.runtime.ParserRuleContext
 import se.blea.flexiconf.parser.gen.ConfigBaseVisitor
 import se.blea.flexiconf.parser.gen.ConfigParser._
@@ -29,15 +27,26 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
   override def visitInclude(ctx: IncludeContext): Option[ConfigNode] = {
     val includePattern = ctx.stringArgument.getText
     val currentPath = stack.peek.map(_.node.source.sourceFile).getOrElse("")
-    val includePath = resolveIncludePath(currentPath, includePattern)
+    val includePath = FileUtil.resolvePath(currentPath, includePattern).toString
     val allowedDirectives = stack.peek.map(_.node.allowedDirectives).getOrElse(Set.empty)
-    val inputStream = Parser.streamFromSourceFile(includePath)
-    val parser = Parser.antlrConfigParserFromStream(inputStream)
     val node = ConfigNode(DirectiveDefinition.include(allowedDirectives), ArgumentVisitor(ctx.stringArgument), sourceFromContext(ctx))
 
-    stack.enterFrame(ConfigVisitorContext(node)) {
-      ConfigVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>
-        node.copy(arguments = List(Argument(includePath)), children = list.children)
+    Parser.streamFromSourceFile(includePath) flatMap { inputStream =>
+      val parser = Parser.antlrConfigParserFromStream(inputStream)
+
+      stack.enterFrame(ConfigVisitorContext(node)) {
+        ConfigVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>
+          node.copy(arguments = List(Argument(includePath)), children = list.children)
+        }
+      }
+    } orElse {
+      val source = sourceFromContext(ctx)
+      val reason = s"File '$includePath' does not exist"
+
+      if (options.allowMissingGroups) {
+        Some(node.copy(children = List(ConfigNode(DirectiveDefinition.warning, List(Argument(reason)), source))))
+      } else {
+        throw new IllegalStateException(s"$reason at $source")
       }
     }
   }
@@ -152,11 +161,6 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
   /** Returns true if the directives associated with the nearest non-internal or root node */
   def directiveAlreadyExists(directive: DirectiveDefinition): Boolean = {
     stack.find(_.node.isUserNode).exists(_.directives.contains(directive))
-  }
-
-  /** Resolve a file path for includes based on the location of the current file **/
-  def resolveIncludePath(basePath: String, path: String) = {
-    Paths.get(basePath).resolveSibling(path).normalize.toString
   }
 
   /** Returns a new Source object based on the provided context */

@@ -1,6 +1,6 @@
 package se.blea.flexiconf
 
-import java.io.{File, FileNotFoundException}
+import java.io.File
 
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -42,7 +42,7 @@ class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
   }
 
   it should "throw an exception when an included file can't be found" in {
-    intercept[FileNotFoundException] {
+    intercept[IllegalStateException] {
       val ctx = parse("include foo/bar/baz_*.conf;")
       val result = visitor(defaultOptions).visitDirective(ctx.directive())
     }
