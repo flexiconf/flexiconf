@@ -64,6 +64,6 @@ lazy val `flexiconf-cli` = project.in(file("flexiconf-cli"))
   .settings(publishSettings:_*)
   .settings(commonDependencies:_*)
   .settings(
-    mainClass in (Compile, run) := Some("se.blea.flexiconf.cli.CLI"))
+    mainClass in Compile := Some("se.blea.flexiconf.cli.CLI"))
   .dependsOn(`flexiconf-core`)
   .dependsOn(`flexiconf-docgen`)
