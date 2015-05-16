@@ -7,8 +7,8 @@ lazy val commonSettings = Seq(
   version := "0.1-SNAPSHOT",
 
   // Compile options
-  javacOptions ++= Seq("-source", "1.7"),
-  javacOptions ++= Seq("-target", "1.7"),
+  javacOptions ++= Seq("-source", "1.8"),
+  javacOptions ++= Seq("-target", "1.8"),
   scalacOptions += "-target:jvm-1.7",
 
   // Test options
@@ -50,7 +50,8 @@ lazy val `flexiconf-docgen` = project.in(file("flexiconf-docgen"))
   .settings(publishSettings:_*)
   .settings(commonDependencies:_*)
   .settings(
-    libraryDependencies += "org.pegdown" % "pegdown" % "1.5.0")
+    libraryDependencies += "org.pegdown" % "pegdown" % "1.5.0",
+    libraryDependencies += "com.github.spullara.mustache.java" % "compiler" % "0.9.0")
   .dependsOn(`flexiconf-core`)
 
 lazy val `flexiconf-java-api` = project.in(file("flexiconf-java-api"))

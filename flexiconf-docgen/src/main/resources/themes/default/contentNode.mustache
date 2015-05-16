@@ -1,0 +1,23 @@
+<div>
+    <div class='panel panel-default'>
+        <div class='panel-heading'>
+            <code>{{syntax}}</code>
+        </div>
+        <div class='panel-body'>
+            {{{notes}}}
+
+            {{#is-restricted}}
+            <b>Restrictions: </b>
+            <ul>
+                {{#restrictions}}
+                <li>{{.}}</li>
+                {{/restrictions}}
+            </ul>
+            {{/is-restricted}}
+
+            {{#directives}}
+              {{> contentNode}}
+            {{/directives}}
+        </div>
+    </div>
+</div>

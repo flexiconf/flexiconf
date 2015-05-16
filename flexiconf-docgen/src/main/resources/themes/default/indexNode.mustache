@@ -1,0 +1,8 @@
+  <li class='{{#accepts-block}}block{{/accepts-block}}'>
+    <a href='#{{ref}}'>{{name}}</a>
+    <ol>
+      {{#directives}}
+        {{> indexNode}}
+      {{/directives}}
+    </ol>
+  </li>

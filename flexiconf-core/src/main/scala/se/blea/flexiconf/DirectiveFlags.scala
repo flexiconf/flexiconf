@@ -3,6 +3,7 @@ package se.blea.flexiconf
 
 /** Base trait for all directive flags */
 trait DirectiveFlag {
+  def documentation: String
 }
 
 
@@ -19,6 +20,7 @@ case class DirectiveFlags(flags: Set[DirectiveFlag] = Set.empty) {
 /** Collection of valid flags */
 object DirectiveFlags {
   object AllowOnce extends DirectiveFlag {
+    override def documentation = "Allow a directive to be specified only once in a surrounding context"
     override def toString: String = "once"
   }
 }
