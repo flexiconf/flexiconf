@@ -7,117 +7,102 @@ import se.blea.flexiconf._
 import se.blea.flexiconf.docgen.MarkdownDocGenerator
 
 object CLI {
+  case class CLIOptions(verbose: Boolean = false,
+                        showUsage: Boolean = false)
+
+  var opts = CLIOptions()
+
   val usage =
-    """ usage: flexiconf action ...
+    """usage: flexiconf [-v] [-h] <action> [<args>]
       |
-      | actions:
-      |   inspect <configFilePath> <schemaFilePath>
-      |   validate <configFilePath> <schemaFilePath>
-      |   generate-docs <schemaFilePath> [documentationFilePath]
-      |   debug <configFilePath> <schemaFilePath>
-    """.stripMargin
+      |Available actions:
+      |  inspect          Parse config, print configuration tree and warnings to stdout
+      |                   args: <configPath> <schemaPath>
+      |
+      |  validate         Ensure config parses successfully without any warnings
+      |                   args: <configPath> <schemaPath>
+      |
+      |  generate-docs    Generate schema documentation
+      |                   args: <schemaPath>
+      |
+      |  debug            Same as inspect, but includes internal nodes in the configuration tree
+      |                   args: <configPath> <schemaPath>""".stripMargin
 
   def main(_args: Array[String]): Unit = {
-    implicit val args: List[String] = _args.toList
+    val optionalArgs = _args.toList.takeWhile(_.startsWith("-"))
+    implicit val args: List[String] = _args.toList.dropWhile(_.startsWith("-"))
+
+    optionalArgs foreach {
+      case "-v" => opts = opts.copy(verbose = true)
+      case "--verbose" => opts = opts.copy(verbose = true)
+
+      case "-h" => opts = opts.copy(showUsage = true)
+      case "--help" => opts = opts.copy(showUsage = true)
+
+      case a: String => exitWithError(s"unknown switch: $a\n\n" + usage)
+    }
 
     if (args.isEmpty) {
       exitWithError(usage)
     }
 
+    if (opts.showUsage) {
+      exitWithError(usage, 0)
+    }
+
     val action = args.head
 
-    action match {
-      case "inspect" => requireArgs(2, inspect(args(1), args(2)), "inspect requires both a config and schema")
-      case "validate" => requireArgs(2, validate(args(1), args(2)), "validate requires both a config and schema")
-      case "generate-docs" => requireArgs(Range(1, 2), generateDocs(args(1), args.lift(2)), "generate-docs requires a schema")
-      case "debug" => requireArgs(2, debug(args(1), args(2)), "debug requires both a config and schema")
-      case _ => exitWithError(s"$action is not a valid action\n\n" + usage)
-    }
-  }
-
-  def inspect(configFilePath: String, schemaFilePath: String) = {
     try {
-      for {
-        schemaOpts <- Some(SchemaOptions.withSourceFile(schemaFilePath))
-        schema <- parseSchema(schemaOpts)
-        configOpts <- Some(ConfigOptions.withSourceFile(configFilePath)
-          .ignoreDuplicateDirectives
-          .ignoreIncludeCycles
-          .ignoreMissingGroups
-          .ignoreMissingIncludes
-          .ignoreUnknownDirectives
-          .withSchema(schema))
-        config <- parseConfig(configOpts)
-      } yield {
-        println(config.renderTree)
-        if (config.warnings.length > 0) {
-          println("Warnings:")
-          config.warnings.foreach(w => println(s"- $w"))
-        }
+      action match {
+        case "inspect" => requireArgs(2, inspect(args(1), args(2)), "inspect requires both a config and schema")
+        case "validate" => requireArgs(2, validate(args(1), args(2)), "validate requires both a config and schema")
+        case "generate-docs" => requireArgs(Range(1, 2), generateDocs(args(1), args.lift(2)), "generate-docs requires a schema")
+        case "debug" => requireArgs(2, debug(args(1), args(2)), "debug requires both a config and schema")
+        case _ => exitWithError(s"$action is not a valid action\n\n" + usage)
       }
     } catch {
       case e: Exception => exitWithError(e.getMessage)
     }
   }
 
-  def debug(configFilePath: String, schemaFilePath: String) = {
-    try {
-      for {
-        schemaOpts <- Some(SchemaOptions.withSourceFile(schemaFilePath))
-        schema <- parseSchema(schemaOpts)
-        configOpts <- Some(ConfigOptions.withSourceFile(configFilePath)
-          .ignoreDuplicateDirectives
-          .ignoreIncludeCycles
-          .ignoreMissingGroups
-          .ignoreMissingIncludes
-          .ignoreUnknownDirectives
-          .withSchema(schema))
-        config <- parseConfig(configOpts)
-      } yield {
-        println(config.renderDebugTree)
-        if (config.warnings.length > 0) {
-          println("Warnings:")
-          config.warnings.foreach(w => println(s"- $w"))
-        }
+  def inspect(configPath: String, schemaPath: String) = {
+    parseWithWarnings(configPath, schemaPath, { config =>
+      println(config.renderTree)
+      if (config.warnings.length > 0) {
+        println("Warnings:")
+        config.warnings.foreach(w => println(s"- $w"))
       }
-    } catch {
-      case e: Exception => exitWithError(e.getMessage)
-    }
+    })
   }
 
-  def validate(configFilePath: String, schemaFilePath: String) = {
-    try {
-      for {
-        schemaOpts <- Some(SchemaOptions.withSourceFile(schemaFilePath))
-        schema <- parseSchema(schemaOpts)
-        configOpts <- Some(ConfigOptions.withSourceFile(configFilePath)
-          .ignoreDuplicateDirectives
-          .ignoreIncludeCycles
-          .ignoreMissingGroups
-          .ignoreMissingIncludes
-          .ignoreUnknownDirectives
-          .withSchema(schema))
-        config <- parseConfig(configOpts)
-      } yield {
-        if (config.warnings.length == 0) {
-          println("\nOK")
-        } else {
-          fail(config.warnings)
-        }
+  def debug(configPath: String, schemaPath: String) = {
+    parseWithWarnings(configPath, schemaPath, { config =>
+      println(config.renderDebugTree)
+      if (config.warnings.length > 0) {
+        println("Warnings:")
+        config.warnings.foreach(w => println(s"- $w"))
       }
-    } catch {
-      case e: Exception => exitWithError(e.getMessage)
-    }
+    })
   }
 
-  def generateDocs(schemaFilePath: String, documentationFilePath: Option[String]) = {
+  def validate(configPath: String, schemaPath: String) = {
+    parseWithWarnings(configPath, schemaPath, { config =>
+      if (config.warnings.length == 0) {
+        vprintln("\nOK")
+      } else {
+        fail(config.warnings)
+      }
+    })
+  }
+
+  def generateDocs(schemaPath: String, documentationFilePath: Option[String]) = {
     try {
       for {
-        schemaOpts <- Some(SchemaOptions.withSourceFile(schemaFilePath))
+        schemaOpts <- Some(SchemaOptions.withSourceFile(schemaPath))
         schema <- parseSchema(schemaOpts)
       } yield {
-        val path = documentationFilePath.getOrElse(Paths.get(schemaFilePath).getFileName + ".html")
-        println(s"Generating documentation at $path")
+        val path = documentationFilePath.getOrElse(Paths.get(schemaPath).getFileName + ".html")
+        vprintln(s"Generating documentation at $path")
         val docs = new File(path)
         val writer = new FileWriter(docs)
         writer.write(MarkdownDocGenerator.process(schema))
@@ -146,13 +131,36 @@ object CLI {
     }
   }
 
+  private def parseWithWarnings(configPath: String, schemaPath: String, fn: Config => Unit) = {
+    for {
+      schemaOpts <- Some(SchemaOptions.withSourceFile(schemaPath))
+      schema <- parseSchema(schemaOpts)
+      configOpts <- Some(ConfigOptions.withSourceFile(configPath)
+        .ignoreDuplicateDirectives
+        .ignoreIncludeCycles
+        .ignoreMissingGroups
+        .ignoreMissingIncludes
+        .ignoreUnknownDirectives
+        .withSchema(schema))
+      config <- parseConfig(configOpts)
+    } yield {
+      fn(config)
+    }
+  }
+
+  private def vprintln(msg: String) = {
+    if (opts.verbose) {
+      println(msg)
+    }
+  }
+
   private def parseSchema(opts: SchemaOptions) = {
-    println(s"Parsing schema ${opts.sourceFile}...")
+    vprintln(s"Parsing schema ${opts.sourceFile}...")
     Parser.parseSchema(opts)
   }
 
   private def parseConfig(opts: ConfigOptions) = {
-    println(s"Parsing config ${opts.sourceFile}...")
+    vprintln(s"Parsing config ${opts.sourceFile}...")
     Parser.parseConfig(opts)
   }
 
