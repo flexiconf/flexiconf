@@ -42,12 +42,12 @@ object CLI {
       case a: String => exitWithError(s"unknown switch: $a\n\n" + usage)
     }
 
-    if (args.isEmpty) {
-      exitWithError(usage)
-    }
-
     if (opts.showUsage) {
       exitWithError(usage, 0)
+    }
+
+    if (args.isEmpty) {
+      exitWithError(usage)
     }
 
     val action = args.head
