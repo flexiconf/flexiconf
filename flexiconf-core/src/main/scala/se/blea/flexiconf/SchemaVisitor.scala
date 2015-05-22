@@ -27,15 +27,23 @@ private[flexiconf] case class SchemaVisitor(options: SchemaVisitorOptions,
 
   /** Resolves all included files and parses them, adding new directives to the configuration tree */
   override def visitInclude(ctx: IncludeContext): Option[DefaultSchemaNode] = {
-    val pattern = ctx.stringArgument.getText
-    val inputStream = Parser.streamFromSourceFile(pattern)
-    val parser = Parser.antlrSchemaParserFromStream(inputStream)
+    val includePattern = ctx.stringArgument.getText
+    val currentPath = stack.peek.map(_.source.sourceFile).getOrElse("")
+    val includePath = FileUtil.resolvePath(currentPath, includePattern).toString
 
-    SchemaVisitor(options.copy(sourceFile = pattern), stack).visitDocument(parser.document()) map { list =>
-      DefaultSchemaNode(name = "$include",
-        parameters = List.empty,
-        source = sourceFromContext(ctx),
-        children = list.children)
+    Parser.streamFromSourceFile(includePath) flatMap { inputStream =>
+      val parser = Parser.antlrSchemaParserFromStream(inputStream)
+
+      SchemaVisitor(options.copy(sourceFile = includePath), stack).visitDocument(parser.document()) map { list =>
+        DefaultSchemaNode(name = "$include",
+          parameters = List.empty,
+          source = sourceFromContext(ctx),
+          children = list.children)
+      }
+    } orElse {
+      val source = sourceFromContext(ctx)
+      val reason = s"File '$includePath' does not exist"
+      throw new IllegalStateException(s"$reason at $source")
     }
   }
 

@@ -14,6 +14,11 @@ case class ConfigOptions private (private[flexiconf] val sourceFile: String = ""
 
   private[flexiconf] var visitorOpts = ConfigVisitorOptions(sourceFile)
 
+  def ignoreDuplicateDirectives = {
+    visitorOpts = visitorOpts.copy(allowDuplicateDirectives = true)
+    this
+  }
+
   def ignoreUnknownDirectives = {
     visitorOpts = visitorOpts.copy(allowUnknownDirectives = true)
     this
