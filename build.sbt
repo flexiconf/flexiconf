@@ -1,5 +1,6 @@
 import sbt.Keys._
 
+
 // Common settings
 lazy val commonSettings = Seq(
   scalaVersion := "2.11.2",
@@ -72,6 +73,7 @@ lazy val antlr4ConfigSettings = Seq(
 lazy val flexiconf = project.in(file("."))
   .settings(commonSettings:_*)
   .settings(publishArtifact := false)
+  .disablePlugins(sbtassembly.AssemblyPlugin)
   .aggregate(
       core,
       docgen,
@@ -86,6 +88,7 @@ lazy val core = project.in(file("flexiconf-core"))
   .settings(commonSettings:_*)
   .settings(antlr4Settings:_*)
   .settings(antlr4ConfigSettings:_*)
+  .disablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonDependencies:_*)
   .settings(
     libraryDependencies += "commons-io" % "commons-io" % "2.4")
@@ -95,6 +98,7 @@ lazy val docgen = project.in(file("flexiconf-docgen"))
     name := "flexiconf-docgen",
     description := "Documentation generators for flexiconf schemas")
   .settings(commonSettings:_*)
+  .disablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonDependencies:_*)
   .settings(
     libraryDependencies += "org.pegdown" % "pegdown" % "1.5.0",
@@ -106,6 +110,7 @@ lazy val javaApi = project.in(file("flexiconf-java-api"))
     name := "flexiconf-java-api",
     description := "Java-friendly API for flexiconf schemas and configs")
   .settings(commonSettings:_*)
+  .disablePlugins(sbtassembly.AssemblyPlugin)
   .settings(commonDependencies:_*)
   .dependsOn(core)
 
