@@ -1,10 +1,9 @@
 package se.blea.flexiconf.cli
 
-import java.io.{File, FileWriter}
-import java.nio.file.Paths
+import java.io.FileOutputStream
 
 import se.blea.flexiconf._
-import se.blea.flexiconf.docgen.MarkdownDocGenerator
+import se.blea.flexiconf.docgen.TemplateDocGenerator
 
 object CLI {
   case class CLIOptions(verbose: Boolean = false,
@@ -101,12 +100,8 @@ object CLI {
         schemaOpts <- Some(SchemaOptions.withSourceFile(schemaPath))
         schema <- parseSchema(schemaOpts)
       } yield {
-        val path = documentationFilePath.getOrElse(Paths.get(schemaPath).getFileName + ".html")
-        vprintln(s"Generating documentation at $path")
-        val docs = new File(path)
-        val writer = new FileWriter(docs)
-        writer.write(MarkdownDocGenerator.process(schema))
-        writer.close()
+        val out = documentationFilePath.map(new FileOutputStream(_)).getOrElse(System.out)
+        out.write(new TemplateDocGenerator("themes/default/layout.mustache").process(schema).getBytes)
       }
     } catch {
       case e: Exception => exitWithError(e.getMessage)

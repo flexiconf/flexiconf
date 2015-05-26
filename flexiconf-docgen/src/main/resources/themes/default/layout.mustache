@@ -1,0 +1,31 @@
+<html>
+  <head>
+    <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css' />
+    <style>
+      ol { counter-reset: item; padding-left: 0; margin-top: .2em }
+      ol li { display: block; margin-bottom: .2em }
+      ol li.block { display: block; margin-top: .8em }
+      ol li:before { content: counters(item, '.') ' '; counter-increment: item; padding-right: .4em }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3">
+          <hr/>
+          <h4>Table of contents</h4>
+          <ol>
+            {{#directives}}
+              {{> indexNode}}
+            {{/directives}}
+          </ol>
+        </div>
+        <div class="col-md-9">
+          {{#directives}}
+            {{> contentNode}}
+          {{/directives}}
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
