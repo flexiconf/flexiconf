@@ -25,7 +25,7 @@ object OptionParser {
               shouldParseOpts: Boolean): (T, List[String]) = {
       val parser = optsParser(opts)
 
-      if (parser.isDefinedAt(remainingArgs)) {
+      if (shouldParseOpts && parser.isDefinedAt(remainingArgs)) {
         val (newOpts, xs) = parser(remainingArgs)
 
         parse(xs, capturedArgs, newOpts, optsParser, shouldParseOpts)

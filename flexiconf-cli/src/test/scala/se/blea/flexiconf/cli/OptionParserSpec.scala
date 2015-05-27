@@ -21,11 +21,11 @@ class OptionParserSpec extends FlatSpec with Matchers{
     assert(List("arg1", "arg2") == parsedArgs)
   }
 
-  it should "not pass options past the first argument" in {
+  it should "not parse options past the first argument" in {
     case class Options(first: String = "",
                        second: Boolean = false)
 
-    val args = "-f foobar --some-flag arg1 arg2 -c -d -e foo".split(" ").toList
+    val args = "-f foobar --some-flag arg1 arg2 -c -d -f bar -e foo".split(" ").toList
 
     val (options, parsedArgs) = OptionParser(args, Options(), (opts: Options) => {
       case "-f" :: first :: remaining => (opts.copy(first = first), remaining)
@@ -34,7 +34,7 @@ class OptionParserSpec extends FlatSpec with Matchers{
 
     assert(options.first == "foobar")
     assert(options.second)
-    assert(List("arg1", "arg2", "-c", "-d", "-e", "foo") == parsedArgs)
+    assert(List("arg1", "arg2", "-c", "-d", "-f", "bar", "-e", "foo") == parsedArgs)
   }
 
   it should "throw an exception for unknown options" in {
