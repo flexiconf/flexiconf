@@ -1,5 +1,3 @@
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
-import org.apache.commons.compress.compressors.CompressorStreamFactory
 import sbt.Keys._
 import sbtfilter.Plugin.FilterKeys._
 
@@ -140,6 +138,7 @@ lazy val distSettings = Seq(
   resources in dist := (resources in Compile).value,
   distDirectory in dist := new File(name.value + "-" + version.value),
   distZip in dist := new File((target in dist).value + ".zip"),
+
   dist <<= (streams,
       distZip in dist,
       classDirectory in Compile,
@@ -186,7 +185,7 @@ lazy val distSettings = Seq(
         streams.log.debug(s"Adding $dest to $distZip")
 
         val entry = new ZipArchiveEntry(src, dest.toString)
-        
+
         if (binScripts.contains(src)) {
           streams.log.debug(s"Marking $dest as executable")
           entry.setUnixMode(0755)
