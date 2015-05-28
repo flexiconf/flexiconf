@@ -1,5 +1,9 @@
 import sbt.Keys._
+import sbtfilter.Plugin.FilterKeys._
 
+/// Nope!
+// workspace/personal/flexiconf/build.sbt:4: error: object CompressorStreamFactory is not a member of package org.apache.commons.compress.compressors.gzip
+import org.apache.commons.compress.compressors.gzip.CompressorStreamFactory
 
 // Common settings
 lazy val commonSettings = Seq(
@@ -120,7 +124,68 @@ lazy val cli = project.in(file("flexiconf-cli"))
     description := "CLI utility for working with flexiconf schemas and configs")
   .settings(commonSettings:_*)
   .settings(commonDependencies:_*)
+  .settings(filterSettings:_*)
+  .settings(
+    includeFilter in (Compile, filterResources) := AllPassFilter)
+  .settings(distSettings:_*)
   .settings(
     mainClass in Compile := Some("se.blea.flexiconf.cli.CLI"))
   .dependsOn(core)
   .dependsOn(docgen)
+
+lazy val dist = taskKey[File]("Creates a distributable zip file containing flexiconf CLI tools")
+lazy val distZip = settingKey[File]("Path to zipfile for dist")
+
+lazy val distSettings = Seq(
+  target in dist := target.value / ("dist/" + name.value + "-" + version.value),
+  resources in dist := (resources in Compile).value,
+  distZip in dist := new File((target in dist).value + ".zip"),
+  dist <<= (streams,
+      distZip in dist,
+      classDirectory in Compile,
+      resourceDirectory in Compile,
+      target in dist,
+      resources in dist,
+      assembly) map {
+    (streams, distZip, classDir, source, target, resources, assemblySrc) =>
+      streams.log.debug(s"target: $target")
+
+      // Copy assembly
+      val assemblyDest = target / ("libs/" + assemblySrc.name)
+      streams.log.debug(s"copying $assemblySrc to $assemblyDest")
+      IO.copy(Seq((assemblySrc, assemblyDest)))
+
+      // Copy resources
+      val copiedResources = resources.flatMap(_.relativeTo(source)) map { r =>
+        val src = classDir / r.getPath
+        val dst = target / r.getPath
+        streams.log.debug(s"copying $src to $dst")
+
+        (src, dst)
+      }
+
+      IO.copy(copiedResources)
+
+      // Make bin scripts executable
+      val copiedResourceDests = copiedResources.map(_._2)
+      val binScripts = copiedResourceDests
+        .filter(_.name.contains("/bin/"))
+
+      binScripts foreach { bin =>
+        streams.log.debug(s"making $bin executable")
+        bin.setExecutable(true)
+      }
+
+      // Zip it up
+      val distSources = copiedResourceDests :+ assemblyDest
+      val distPaths = distSources.map(_.relativeTo(target).get.toString)
+      distPaths.foreach(s => streams.log.info(s"Adding $s"))
+
+      // Nope!
+      val gzipOut = new CompressorStreamFactory()
+
+      // IO.zip(distSources.zip(distPaths), distZip)
+      // streams.log.info(s"Distribution packaged at $distZip")
+
+      distZip
+  })
