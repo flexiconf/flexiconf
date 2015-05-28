@@ -1,9 +1,7 @@
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
+import org.apache.commons.compress.compressors.CompressorStreamFactory
 import sbt.Keys._
 import sbtfilter.Plugin.FilterKeys._
-
-/// Nope!
-// workspace/personal/flexiconf/build.sbt:4: error: object CompressorStreamFactory is not a member of package org.apache.commons.compress.compressors.gzip
-import org.apache.commons.compress.compressors.gzip.CompressorStreamFactory
 
 // Common settings
 lazy val commonSettings = Seq(
@@ -134,11 +132,13 @@ lazy val cli = project.in(file("flexiconf-cli"))
   .dependsOn(docgen)
 
 lazy val dist = taskKey[File]("Creates a distributable zip file containing flexiconf CLI tools")
-lazy val distZip = settingKey[File]("Path to zipfile for dist")
+lazy val distDirectory = settingKey[File]("Directory to use for the distribution")
+lazy val distZip = settingKey[File]("Path to zipfile for the distribution")
 
 lazy val distSettings = Seq(
-  target in dist := target.value / ("dist/" + name.value + "-" + version.value),
+  target in dist := target.value / ("dist/" + (distDirectory in dist).value),
   resources in dist := (resources in Compile).value,
+  distDirectory in dist := new File(name.value + "-" + version.value),
   distZip in dist := new File((target in dist).value + ".zip"),
   dist <<= (streams,
       distZip in dist,
@@ -146,46 +146,59 @@ lazy val distSettings = Seq(
       resourceDirectory in Compile,
       target in dist,
       resources in dist,
+      distDirectory in dist,
       assembly) map {
-    (streams, distZip, classDir, source, target, resources, assemblySrc) =>
-      streams.log.debug(s"target: $target")
-
+    (streams, distZip, classDir, source, target, resources, distDir, assemblySrc) =>
       // Copy assembly
       val assemblyDest = target / ("libs/" + assemblySrc.name)
-      streams.log.debug(s"copying $assemblySrc to $assemblyDest")
+      streams.log.debug(s"Copying $assemblySrc to $assemblyDest")
       IO.copy(Seq((assemblySrc, assemblyDest)))
 
       // Copy resources
       val copiedResources = resources.flatMap(_.relativeTo(source)) map { r =>
         val src = classDir / r.getPath
         val dst = target / r.getPath
-        streams.log.debug(s"copying $src to $dst")
+        streams.log.debug(s"Copying $src to $dst")
 
         (src, dst)
       }
 
       IO.copy(copiedResources)
 
-      // Make bin scripts executable
+      // Mark bin scripts as executable
       val copiedResourceDests = copiedResources.map(_._2)
       val binScripts = copiedResourceDests
-        .filter(_.name.contains("/bin/"))
+        .filter(_.toString.contains("/bin/"))
 
       binScripts foreach { bin =>
-        streams.log.debug(s"making $bin executable")
+        streams.log.debug(s"Marking $bin as executable")
         bin.setExecutable(true)
       }
 
-      // Zip it up
+      // Zip it up - use commons compress so we can set executable bits
+      import org.apache.commons.compress.archivers.zip._
+
       val distSources = copiedResourceDests :+ assemblyDest
-      val distPaths = distSources.map(_.relativeTo(target).get.toString)
-      distPaths.foreach(s => streams.log.info(s"Adding $s"))
+      val distPaths = distSources.map(distDir / _.relativeTo(target).get.toString)
+      val zipOut = new ZipArchiveOutputStream(new File(distZip.toString))
 
-      // Nope!
-      val gzipOut = new CompressorStreamFactory()
+      (distSources zip distPaths filter(_._1.isFile)) foreach { case (src, dest) =>
+        streams.log.debug(s"Adding $dest to $distZip")
 
-      // IO.zip(distSources.zip(distPaths), distZip)
-      // streams.log.info(s"Distribution packaged at $distZip")
+        val entry = new ZipArchiveEntry(src, dest.toString)
+        
+        if (binScripts.contains(src)) {
+          streams.log.debug(s"Marking $dest as executable")
+          entry.setUnixMode(0755)
+        }
 
+        zipOut.putArchiveEntry(entry)
+        zipOut.write(IO.readBytes(src))
+        zipOut.closeArchiveEntry()
+      }
+
+      zipOut.close()
+
+      streams.log.debug(s"Distribution built: $distZip")
       distZip
   })
