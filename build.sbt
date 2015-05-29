@@ -7,8 +7,8 @@ lazy val commonSettings = Seq(
   version := "0.1-SNAPSHOT",
 
   // Compile options
-  javacOptions ++= Seq("-source", "1.8"),
-  javacOptions ++= Seq("-target", "1.8"),
+  javacOptions ++= Seq("-source", "1.7"),
+  javacOptions ++= Seq("-target", "1.7"),
   scalacOptions += "-target:jvm-1.7",
 
   // Test options
