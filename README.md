@@ -1,6 +1,6 @@
 # Flexiconf
 
-[![Build Status](https://travis-ci.org/thetristan/flexiconf.svg?branch=add-travis-ci)](https://travis-ci.org/thetristan/flexiconf)
+[![Build Status](https://travis-ci.org/flexiconf/flexiconf.svg?branch=add-travis-ci)](https://travis-ci.org/flexiconf/flexiconf)
 
 Flexible configuration for JVM projects.
 
