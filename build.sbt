@@ -10,10 +10,25 @@ lazy val commonSettings = Seq(
   homepage := Some(url("http://www.github.com/flexiconf/flexiconf")),
   scmInfo := Some(ScmInfo(url("http://www.github.com/flexiconf/flexiconf"), "scm:git:git@github.com:flexiconf/flexiconf.git")),
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
-  developers := List(
-    Developer("thetristan", "Tristan Blease", "tristan@blea.se", url("http://tristan.blea.se/")),
-    Developer("dustyburwell", "Dusty Burwell", "dustyburwell@gmail.com", url("http://www.dustyburwell.com/"))
-  ),
+
+  // Need to use XML here until a fix for rendering the developer key in poms
+  // lands in the next SBT release (fixed in 1c8fe704)
+  pomExtra := {
+    <developers>
+      <developer>
+        <id>thetristan</id>
+        <name>Tristan Blease</name>
+        <email>tristan@blea.se</email>
+        <url>http://tristan.blea.se/</url>
+      </developer>
+      <developer>
+        <id>dustyburwell</id>
+        <name>Dusty Burwell</name>
+        <email>dustyburwell@gmail.com</email>
+        <url>http://www.dustyburwell.com/</url>
+      </developer>
+    </developers>
+  },
 
   // Publish options
   publishMavenStyle := true,
