@@ -6,10 +6,12 @@ lazy val commonSettings = Seq(
   organization := "se.blea.flexiconf",
   version := "0.1-SNAPSHOT",
 
-  // Additional information
   homepage := Some(url("http://www.github.com/flexiconf/flexiconf")),
   scmInfo := Some(ScmInfo(url("http://www.github.com/flexiconf/flexiconf"), "scm:git:git@github.com:flexiconf/flexiconf.git")),
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
+
+  organizationName := "Flexiconf",
+  organizationHomepage := Some(url("http://www.github.com/flexiconf")),
 
   // Need to use XML here until a fix for rendering the developer key in poms
   // lands in the next SBT release (fixed in 1c8fe704)
