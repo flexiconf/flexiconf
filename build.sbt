@@ -6,6 +6,43 @@ lazy val commonSettings = Seq(
   organization := "se.blea.flexiconf",
   version := "0.1-SNAPSHOT",
 
+  homepage := Some(url("http://www.github.com/flexiconf/flexiconf")),
+  scmInfo := Some(ScmInfo(url("http://www.github.com/flexiconf/flexiconf"), "scm:git:git@github.com:flexiconf/flexiconf.git")),
+  licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
+
+  organizationName := "Flexiconf",
+  organizationHomepage := Some(url("http://www.github.com/flexiconf")),
+
+  // Need to use XML here until a fix for rendering the developer key in poms
+  // lands in the next SBT release (fixed in 1c8fe704)
+  pomExtra := {
+    <developers>
+      <developer>
+        <id>thetristan</id>
+        <name>Tristan Blease</name>
+        <email>tristan@blea.se</email>
+        <url>http://tristan.blea.se/</url>
+      </developer>
+      <developer>
+        <id>dustyburwell</id>
+        <name>Dusty Burwell</name>
+        <email>dustyburwell@gmail.com</email>
+        <url>http://www.dustyburwell.com/</url>
+      </developer>
+    </developers>
+  },
+
+  // Publish options
+  publishMavenStyle := true,
+  publishArtifact in Test := false,
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value)
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    else
+      Some("releases" at nexus + "service/local/staging/deploy/maven2")
+  },
+
   // Compile options
   javacOptions ++= Seq("-source", "1.7"),
   javacOptions ++= Seq("-target", "1.7"),
@@ -26,45 +63,54 @@ lazy val antlr4ConfigSettings = Seq(
   unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "antlr4"
 )
 
-//Publish settings
-publishArtifact := false
-
-publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/.m2/repository")))
-
-lazy val publishSettings = Seq(
-  publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/.m2/repository")))
-)
+// Root project
+lazy val flexiconf = project.in(file("."))
+  .settings(commonSettings:_*)
+  .settings(publishArtifact := false)
+  .aggregate(
+      core,
+      docgen,
+      javaApi,
+      cli)
 
 // Project definitions
-lazy val `flexiconf-core` = project.in(file("flexiconf-core"))
+lazy val core = project.in(file("flexiconf-core"))
+  .settings(
+    name := "flexiconf-core",
+    description := "Flexible configuration for JVM projects")
   .settings(commonSettings:_*)
   .settings(antlr4Settings:_*)
   .settings(antlr4ConfigSettings:_*)
-  .settings(publishSettings:_*)
   .settings(commonDependencies:_*)
   .settings(
     libraryDependencies += "commons-io" % "commons-io" % "2.4")
 
-lazy val `flexiconf-docgen` = project.in(file("flexiconf-docgen"))
+lazy val docgen = project.in(file("flexiconf-docgen"))
+  .settings(
+    name := "flexiconf-docgen",
+    description := "Documentation generators for flexiconf schemas")
   .settings(commonSettings:_*)
-  .settings(publishSettings:_*)
   .settings(commonDependencies:_*)
   .settings(
     libraryDependencies += "org.pegdown" % "pegdown" % "1.5.0",
     libraryDependencies += "com.github.spullara.mustache.java" % "compiler" % "0.9.0")
-  .dependsOn(`flexiconf-core`)
+  .dependsOn(core)
 
-lazy val `flexiconf-java-api` = project.in(file("flexiconf-java-api"))
+lazy val javaApi = project.in(file("flexiconf-java-api"))
+  .settings(
+    name := "flexiconf-java-api",
+    description := "Java-friendly API for flexiconf schemas and configs")
   .settings(commonSettings:_*)
-  .settings(publishSettings:_*)
   .settings(commonDependencies:_*)
-  .dependsOn(`flexiconf-core`)
+  .dependsOn(core)
 
-lazy val `flexiconf-cli` = project.in(file("flexiconf-cli"))
+lazy val cli = project.in(file("flexiconf-cli"))
+  .settings(
+    name := "flexiconf-cli",
+    description := "CLI utility for working with flexiconf schemas and configs")
   .settings(commonSettings:_*)
-  .settings(publishSettings:_*)
   .settings(commonDependencies:_*)
   .settings(
     mainClass in Compile := Some("se.blea.flexiconf.cli.CLI"))
-  .dependsOn(`flexiconf-core`)
-  .dependsOn(`flexiconf-docgen`)
+  .dependsOn(core)
+  .dependsOn(docgen)
