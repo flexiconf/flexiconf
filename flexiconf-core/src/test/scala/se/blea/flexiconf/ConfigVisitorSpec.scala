@@ -23,22 +23,22 @@ class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
   behavior of "#visitInclude"
 
   it should "return an include directive node for includes" in {
-    val conf = SampleConfigs.BASIC_TREE
+    val conf = Configs.BASIC_TREE
     val ctx = parse(s"include $conf;")
     val result = visitor(defaultOptions.ignoreUnknownDirectives).visitDirective(ctx.directive())
 
     assert(result.get.name == "$include")
-    assert(result.get.arguments(0).value == conf)
+    assert(result.get.arguments(0).value.stringValue.get == conf)
   }
 
   it should "resolve absolute file include paths" in {
-    val conf = SampleConfigs.BASIC_TREE
+    val conf = Configs.BASIC_TREE
     val absPath = new File(".").toPath.toAbsolutePath.normalize.toString + "/" + conf
     val ctx = parse(s"include $absPath;")
     val result = visitor(defaultOptions.ignoreUnknownDirectives).visitDirective(ctx.directive())
 
     assert(result.get.name == "$include")
-    assert(result.get.arguments(0).value == absPath)
+    assert(result.get.arguments(0).value.stringValue.get == absPath)
   }
 
   it should "throw an exception when an included file can't be found" in {
@@ -50,7 +50,7 @@ class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "not allow directives to be repeated if they already exist in the given scope" in {
     intercept[IllegalStateException] {
-      val conf = SampleConfigs.BASIC_TREE
+      val conf = Configs.BASIC_TREE
       val directives = schema("directive arg1:String arg2:String [once];")
       val ctx = parse(s"directive faz qux; include $conf;")
 
@@ -71,7 +71,7 @@ class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     val result = visitor(defaultOptions, makeStack(root)).visitDirective(ctx.directive())
 
     assert(result.get.name == "$group")
-    assert(result.get.arguments(0).value == "my_group")
+    assert(result.get.arguments(0).value.stringValue.get == "my_group")
     assert(result.get.children.size == 0)
   }
 
@@ -84,7 +84,7 @@ class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     val result = visitor(defaultOptions, stack).visitDirectiveList(ctx.directiveList())
 
     assert(result.get.name == "$use")
-    assert(result.get.arguments(0).value == "my_group")
+    assert(result.get.arguments(0).value.stringValue.get == "my_group")
   }
 
   it should "return a warning node when an unknown group is encountered and missing groups are ignored" in {
@@ -143,7 +143,7 @@ class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     val result = visitor(defaultOptions, stack).visitDirective(ctx.directive())
 
     assert(result.get.name == "foo")
-    assert(result.get.arguments(0).value == "123")
+    assert(result.get.arguments(0).value.stringValue.get == "123")
   }
 
   it should "allow multiple directives if a directive permits multiples" in {
@@ -202,7 +202,7 @@ class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
 
     assert(result.size == 2)
     assert(result(0).name == "foo")
-    assert(result(0).arguments(0).value == "123")
+    assert(result(0).arguments(0).value.stringValue.get == "123")
     assert(result(1).name == "bar")
   }
 }

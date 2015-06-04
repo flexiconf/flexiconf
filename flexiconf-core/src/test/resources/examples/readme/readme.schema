@@ -1,0 +1,34 @@
+## Default admin contact information for all servers
+admin email:String;
+
+## ## Servers
+##
+## Server configuration and the interface this server should listen on
+## - <pre>server 127.0.0.0 8080 { ... }</pre>
+##
+server address:String port:Int {
+
+    ## Default admin contact information for all virtual hosts on this server
+    admin email:String;
+
+    ## ### Virtual hosts
+    ## Virtual host for this server
+    ## - <pre>virtualHost tristan.blea.se { ... }</pre>
+    ##
+    virtualHost name:String {
+
+        ## Make this virtual host the default for this server
+        default;
+
+        ## Additional aliases to use for this virtual host
+        ## - <pre>alias foo.blea.se;</pre>
+        ##
+        alias name:String;
+
+        ## Admin contact information for this virtual host
+        admin email:String;
+
+        ## Path on the filesystem to serve for this virtual host's root
+        root path:String [once];
+    }
+}

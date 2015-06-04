@@ -12,7 +12,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
 
   it should "return strings for string values" in {
     val a = StringArgument
-    val res = a.valueOf("foo")
+    val res: String = a.valueOf("foo")
 
     assert(res == "foo")
     assert(res.isInstanceOf[String])
@@ -41,7 +41,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
 
   it should "return longs for int values" in {
     val a = IntArgument
-    val res = a.valueOf("101")
+    val res: Long = a.valueOf("101")
 
     assert(res == 101L)
     assert(res.isInstanceOf[Long])
@@ -70,7 +70,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
 
   it should "return doubles for decimal values" in {
     val a = DecimalArgument
-    val res = a.valueOf("101.00001")
+    val res: Double = a.valueOf("101.00001")
 
     assert(res == 101.00001)
     assert(res.isInstanceOf[Double])
@@ -98,7 +98,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
 
   it should "return longs for duration arguments" in {
     val a = DurationArgument
-    val res = a.valueOf("10s")
+    val res: Long = a.valueOf("10s")
 
     assert(res == 10000)
     assert(res.isInstanceOf[Long])
@@ -129,7 +129,7 @@ class ArgumentSpec extends FlatSpec with Matchers {
 
   it should "return doubles for percentage arguments" in {
     val a = PercentageArgument
-    val res = a.valueOf("50%")
+    val res: Double = a.valueOf("50%")
 
     assert(res == 0.5)
     assert(res.isInstanceOf[Double])
@@ -160,13 +160,13 @@ class ArgumentSpec extends FlatSpec with Matchers {
     val a = BoolArgument
 
     Seq("true", "y", "yes", "on") foreach { v =>
-      val res = a.valueOf(v)
+      val res: Boolean = a.valueOf(v)
       assert(res)
       assert(res.isInstanceOf[Boolean])
     }
 
     Seq("off", "no", "n", "false", "", "asdf") foreach { v =>
-      val res = a.valueOf(v)
+      val res: Boolean = a.valueOf(v)
       assert(!res)
       assert(res.isInstanceOf[Boolean])
     }

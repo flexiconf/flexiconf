@@ -12,19 +12,30 @@ class Directive(private val _directive: se.blea.flexiconf.Directive) {
   def getDirectives: java.util.List[Directive] = _directive.directives.map(new Directive(_))
 
   @annotation.varargs
-  def getDirectives(names: String*): java.util.List[Directive] = _directive.directives
-    .filter( d => names.contains(d.name) )
-    .map(new Directive(_))
+  def getDirectives(names: String*): java.util.List[Directive] = _directive.directives(names:_*).map(new Directive(_))
 
-  def getDirective(name: String): Directive = _directive.directives
-    .find(_.name == name)
-    .map(new Directive(_))
-    .orNull
+  def getDirective(name: String): Directive = new Directive(_directive.directive(name))
 
-  def getBoolArg(name: String): java.lang.Boolean = _directive.boolArg(name)
-  def getPercentageArg(name: String): java.lang.Double = _directive.percentageArg(name)
-  def getDecimalArg(name: String): java.lang.Double = _directive.decimalArg(name)
-  def getStringArg(name: String): java.lang.String = _directive.stringArg(name)
-  def getIntArg(name: String): java.lang.Long = _directive.intArg(name)
-  def getDurationArg(name: String): java.lang.Long = _directive.durationArg(name)
+  private def boolArg(name: String): Option[Boolean] = _directive.argValue(name).boolValue
+  private def longArg(name: String): Option[Long] = _directive.argValue(name).longValue
+  private def doubleArg(name: String): Option[Double] = _directive.argValue(name).doubleValue
+  private def stringArg(name: String): Option[String] = _directive.argValue(name).stringValue
+
+  def getBoolArg(name: String): java.lang.Boolean = boolArg(name).get
+  def getBoolArg(name: String, default: java.lang.Boolean): java.lang.Boolean = boolArg(name).getOrElse[Boolean](default)
+
+  def getPercentageArg(name: String): java.lang.Double = doubleArg(name).get
+  def getPercentageArg(name: String, default: java.lang.Double): java.lang.Double = doubleArg(name).getOrElse[Double](default)
+
+  def getDecimalArg(name: String): java.lang.Double = doubleArg(name).get
+  def getDecimalArg(name: String, default: java.lang.Double): java.lang.Double = doubleArg(name).getOrElse[Double](default)
+
+  def getStringArg(name: String): java.lang.String = stringArg(name).get
+  def getStringArg(name: String, default: java.lang.String): java.lang.String = stringArg(name).getOrElse[String](default)
+
+  def getIntArg(name: String): java.lang.Long = longArg(name).get
+  def getIntArg(name: String, default: java.lang.Long): java.lang.Long = longArg(name).getOrElse[Long](default)
+
+  def getDurationArg(name: String): java.lang.Long = longArg(name).get
+  def getDurationArg(name: String, default: java.lang.Long): java.lang.Long = longArg(name).getOrElse[Long](default)
 }
