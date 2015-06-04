@@ -5,7 +5,7 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.2",
   crossScalaVersions := Seq("2.10.4", "2.11.2"),
   organization := "se.blea.flexiconf",
-  version := "0.1-SNAPSHOT",
+  version := "0.1.0-SNAPSHOT",
 
   homepage := Some(url("http://www.github.com/flexiconf/flexiconf")),
   scmInfo := Some(ScmInfo(url("http://www.github.com/flexiconf/flexiconf"), "scm:git:git@github.com:flexiconf/flexiconf.git")),
