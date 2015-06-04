@@ -44,6 +44,10 @@ lazy val commonSettings = Seq(
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
 
+  // Release options
+  releaseCrossBuild := true,
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+
   // Compile options
   javacOptions ++= Seq("-source", "1.7"),
   javacOptions ++= Seq("-target", "1.7"),
