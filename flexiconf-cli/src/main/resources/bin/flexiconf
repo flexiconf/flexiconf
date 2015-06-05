@@ -1,3 +1,0 @@
-#!/bin/sh
-BIN_PATH=$(dirname "$0")
-exec java -jar $BIN_PATH/../libs/${name}-assembly-${version}.jar
