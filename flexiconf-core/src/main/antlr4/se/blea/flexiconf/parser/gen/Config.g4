@@ -100,8 +100,8 @@ GROUP_LITERAL
  ;
 
 STRING_LITERAL
- : '"' ( ~["\r\n] )* '"'
- | '\'' (  ~['\r\n] )* '\''
+ : '"' (~["\\\r\n] | '\\' ~[\r\n])* '"'
+ | '\'' (~['\\\r\n] | '\\' ~[\r\n])* '\''
  ;
 
 DECIMAL_INT_LITERAL

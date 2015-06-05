@@ -37,6 +37,27 @@ class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     assert(result(0).value == "foo")
   }
 
+  it should "return string arguments for double quoted string arguments with escaped quotes in them" in {
+    val ctx = parse("\"foo bar\\t \\r \\n \\\\ \\\"\"").argument()
+    val result = ArgumentVisitor(ctx)
+    assert(result(0).kind == StringArgument)
+    assert(result(0).value == "foo bar\\t \\r \\n \\\\ \\\"")
+  }
+
+  it should "return string arguments for single quoted string arguments with escaped quotes in them" in {
+    val ctx = parse("'foo bar\\t \\r \\n \\\\ \\''").argument()
+    val result = ArgumentVisitor(ctx)
+    assert(result(0).kind == StringArgument)
+    assert(result(0).value == "foo bar\\t \\r \\n \\\\ \\'")
+  }
+
+  it should "return string arguments for quoted string arguments with escaped slashes in them" in {
+    val ctx = parse("'foo bar\\t \\r \\n \\\\ \\'\\\\'").argument()
+    val result = ArgumentVisitor(ctx)
+    assert(result(0).kind == StringArgument)
+    assert(result(0).value == "foo bar\\t \\r \\n \\\\ \\'\\\\")
+  }
+
   it should "return string arguments for unquoted string arguments" in {
     val ctx = parse("foo").argument()
     val result = ArgumentVisitor(ctx)
