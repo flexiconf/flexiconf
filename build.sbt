@@ -115,7 +115,9 @@ lazy val cli = project.in(file("flexiconf-cli"))
     description := "CLI utility for working with flexiconf schemas and configs")
   .settings(commonSettings:_*)
   .settings(commonDependencies:_*)
+  .settings(packSettings:_*)
   .settings(
-    mainClass in Compile := Some("se.blea.flexiconf.cli.CLI"))
+    mainClass in Compile := Some("se.blea.flexiconf.cli.CLI"),
+    packMain := Map("flexiconf" -> "se.blea.flexiconf.cli.CLI"))
   .dependsOn(core)
   .dependsOn(docgen)
