@@ -8,11 +8,6 @@ import se.blea.flexiconf.parser.gen.{ConfigParser, ConfigLexer, SchemaParser, Sc
 
 /** Helper methods for working with config parsers */
 trait ConfigHelpers {
-
-  object SampleConfigs {
-    val BASIC_TREE = "flexiconf-core/src/test/resources/config/parser_test/basic_tree.conf"
-  }
-
   def defaultOptions = ConfigOptions.withSourceFile("test")
 
   def node(d: DirectiveDefinition): ConfigNode = ConfigNode(d, List.empty, Source("", 0, 0))

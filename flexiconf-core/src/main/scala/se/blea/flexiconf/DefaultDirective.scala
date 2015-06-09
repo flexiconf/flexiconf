@@ -1,49 +1,108 @@
 package se.blea.flexiconf
 
+/** Object that represents missing directives in the config **/
+private[flexiconf] object NullDirective {
+  def apply(definition: DirectiveDefinition) = {
+    val nullArgs = definition.parameters.map(_ => Argument("", UnknownArgument))
+    val nullNode = new ConfigNode(definition.copy(name = "unknown"), nullArgs, Source("-", 0, 0))
+    DefaultDirective(nullNode)
+  }
+}
+
+
+/** Helpers for working with directives */
+private[flexiconf] object DefaultDirective {
+   val unknown = new DefaultDirective(ConfigNode(DirectiveDefinition.unknown, List.empty, Source("unknown", 0, 0)))
+
+  /** Return a DefaultDirective given the provided name or path */
+  def getDirective(directives: List[DefaultDirective], name: String): Option[DefaultDirective] = {
+    directives.find(_.name == name)
+  }
+
+  /** Return all DefaultDirectives given a provided name */
+  def getDirectives(directives: List[DefaultDirective], name: String): List[DefaultDirective] = {
+    directives.filter(_.name == name)
+  }
+
+  /** Return an option containing the given argument value */
+  def getArg[T](d: DefaultDirective, argPath: String): Option[ArgumentValue] = {
+    d.args.find(_.name == argPath).map(_.value)
+  }
+
+  type IllegalStateExceptionGenerator = (String, Set[String], Set[String]) => Throwable
+
+  def entityNotAllowed(singular: String, plural: String, warning: String, complement: String): IllegalStateExceptionGenerator = {
+    (name: String, allowedDirectives: Set[String], illegalDirectives: Set[String]) => {
+      val illegal = illegalDirectives.mkString("', '")
+      val subject = if (illegalDirectives.size > 1) plural else singular
+
+      val allowedMessage = if (allowedDirectives.size > 0) {
+        val allowed = allowedDirectives.mkString("', '")
+        val verb = if (allowedDirectives.size > 1) "are" else "is"
+        s": only '$allowed' $verb $complement"
+      } else {
+        ""
+      }
+
+      new IllegalStateException(s"$subject '$illegal' $warning $name" ++ allowedMessage)
+    }
+  }
+
+  def directiveNotAllowed = entityNotAllowed("Directive", "Directives", "not allowed in", "allowed")
+
+  def argumentNotAllowed = entityNotAllowed("Argument", "Arguments", "not defined for", "defined")
+}
 
 /** Default implementation of a directive */
-class DefaultDirective(private val node: ConfigNode) extends Directive {
-  /** Name of this directive */
+private[flexiconf] case class DefaultDirective(private val node: ConfigNode) extends Directive {
+  import DefaultDirective._
+
+  private lazy val _directives = node.children.map(new DefaultDirective(_))
+  private lazy val allowedDirectives = node.allowedDirectives.map(_.name)
+  private lazy val allowedArguments = node.allowedArguments.map(_.name).toSet
+
   override def name: String = node.name
 
-  /** Collect all warnings associated with this directive and child directives */
-  override def warnings: List[String] = node.warnings
-
-  /** Get all child directives for this directive */
-  override def directives: List[Directive] = node.children.map(new DefaultDirective(_))
-
-  /** Get all args **/
   override def args: List[Argument] = node.arguments
 
-  /** Get int value of argument **/
-  override def intArg(argName: String): Long = getArg(argName, IntArgument)
+  override def contains(name: String) = {
+    directive(name).name != "unknown"
+  }
 
-  /** Get string value of argument **/
-  override def stringArg(argName: String): String = getArg(argName, StringArgument)
-
-  /** Get boolean value of argument **/
-  override def boolArg(argName: String): Boolean = getArg(argName, BoolArgument)
-
-  /** Get decimal value of argument **/
-  override def decimalArg(argName: String): Double = getArg(argName, DecimalArgument)
-
-  /** Get duration value of argument **/
-  override def durationArg(argName: String): Long = getArg(argName, DurationArgument)
-
-  /** Get percentage value of argument **/
-  override def percentageArg(argName: String): Double = getArg(argName, PercentageArgument)
-
-  /** Return the argument value if it exists, throws exception otherwise */
-  private def getArg[T](argName: String, kind: ArgumentKind[T]): T = {
-    // throw exception if the directive accepts no argument
-    if (args.size == 0) {
-      throw new IllegalStateException(s"Unknown argument: $argName - directive '$name' accepts no arguments")
+  override def directive(name: String): Directive = {
+    if (allowedDirectives.contains(name)) {
+      getDirective(_directives, name) getOrElse {
+        NullDirective(node.directive.children.find(_.name == name).get)
+      }
+    } else {
+      throw directiveNotAllowed(this.name, allowedDirectives, Set(name))
     }
+  }
 
-    // Get argument value or throw exception if the named argument isn't valid for this directive
-    args.find(_.name == argName).map(_.value).map(kind.valueOf) getOrElse {
-      val validArgs = node.directive.parameters.mkString(" ")
-      throw new IllegalStateException(s"Unknown argument: $argName - valid arguments for directive '$name': $validArgs")
+  override def directives: List[Directive] = _directives
+
+  override def directives(names: String*): List[Directive] = {
+    val missing = names.toSet &~ allowedDirectives
+    if (missing.size == 0) {
+      names.flatMap(getDirectives(_directives, _)).toList
+    } else {
+      throw directiveNotAllowed(this.name, allowedDirectives, missing)
+    }
+  }
+
+  override def warnings: List[String] = node.warnings
+
+  override def apply: ArgumentValue = argValue(0)
+
+  override def argValue(idx: Int): ArgumentValue = {
+    args.lift(idx).map(_.value).getOrElse(NullValue)
+  }
+
+  override def argValue(name: String): ArgumentValue = {
+    if (allowedArguments.contains(name)) {
+      getArg(this, name).getOrElse(NullValue)
+    } else {
+      throw argumentNotAllowed(this.name, allowedArguments, Set(name))
     }
   }
 }

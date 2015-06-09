@@ -44,9 +44,11 @@ server address:String port:Int {
         ##
         alias name:String;
 
+        ## Defines admin contact information for this host
+        admin email:String;
+
         ## Defines the path on the filesystem to serve for this virtual host's root
         root path:String [once];
-
     }
 }
 ```
@@ -56,18 +58,23 @@ server address:String port:Int {
 ```
 server 127.0.0.1 9000 {
     virtualHost tristan.blea.se {
-        alias foo.blea.se;
+        alias foo1.blea.se;
+        alias foo2.blea.se;
+
+        admin tristan@blea.se;
         root /var/www/se/blea/tristan;
     }
 
     virtualHost flexiconf.blea.se {
+        admin nobody@blea.se;
         root /var/www/se/blea/flexiconf;
     }
-    
+
     virtualHost other.blea.se {
-        include /path/to/other/config.conf; 
+        # Nothing else to see here
     }
 }
+```
 
 ### Sample usage
 
@@ -89,21 +96,26 @@ Parser.parseConfig(confPath, schemaPath) map { config =>
   // Use \ to select the first directive named "server"
   val server = config \ "server"
   
-  // Use % to pluck arguments named "port" and "address" from the "server" 
+  // Use % to pluck arguments named "port" and "address" from the "server" directive
   // directive we selected above
   val (address, port) = server % ("address", "port")
 
   // Use \\ to select all directives matching the name "virtualHost"
   val virtualHosts = (server \\ "virtualHost") map { vhost =>
+  
+    // Use % to pluck argument named "name" from this "virtualHost" directive
     val name = vhost % "name" 
   
-    // Use \ to select the first directives named "alias" and "root"
-    val (alias, root) = vhost \ ("alias", "root")
+    // Use \ to select the first directives named "root" and "admin"
+    val (root, admin) = vhost \ ("root", "admin")
+    
+    // Select all directives named "alias" and get their string value
+    val aliases = (vhost \\ "alias") flatMap (_.stringValue)
   
     // Use the Directive or ArgumentValue in place of Strings, Ints, 
     // Floats, Doubles, and Booleans. Use | to specify default values 
     // if a Directive or ArgumentValue may not exist
-    new VirtualServer(name, alias, root | "/var/www")
+    new VirtualServer(name, aliases, root | "/var/www", admin)
   }
 
   new Server(address, port, virtualHosts)

@@ -5,14 +5,15 @@ import scala.annotation.varargs
 /**
  * Defines the name, parameters, and allowed child directives for a configuration directive
  *
- * User-defined directive names must match the pattern "[a-zA-Z]\w+" so that they can be identified separately
- * from built-in directives that start with '$' (e.g. \$root, \$use, \$group, \$include).
+ * User-defined directive names may consist of any non-whitespace characters as long as they
+ * do not start with '$' so that they can be identified separately from built-in directives that
+ * start with '$' (e.g. \$root, \$use, \$group, \$include).
  */
-case class DirectiveDefinition private[flexiconf](private[flexiconf] val name: String,
-                                                  private[flexiconf] val parameters: List[Parameter] = List.empty,
-                                                  private[flexiconf] val flags: Set[DirectiveFlag] = Set.empty,
-                                                  private[flexiconf] val documentation: String = "",
-                                                  private[flexiconf] val children: Set[DirectiveDefinition] = Set.empty) {
+private[flexiconf] case class DirectiveDefinition private[flexiconf](name: String,
+                                                                     parameters: List[Parameter] = List.empty,
+                                                                     flags: Set[DirectiveFlag] = Set.empty,
+                                                                     documentation: String = "",
+                                                                     children: Set[DirectiveDefinition] = Set.empty) {
 
   /** True if this directive expects a block */
   private[flexiconf] val requiresBlock = children.nonEmpty
@@ -57,6 +58,9 @@ object DirectiveDefinition {
 
   /** Placeholder for errors encountered when parsing a configuration tree */
   private[flexiconf] def warning = new DirectiveDefinition(name = "$warning", parameters = List(Parameter("message")))
+
+  /** Placeholder for unknown directives when reading a configuration tree */
+  private[flexiconf] val unknown = new DirectiveDefinition(name = "unknown")
 
   /** Find the first matching directive given a list of allowed directives */
   private[flexiconf] def find(maybeDirective: MaybeDirective,

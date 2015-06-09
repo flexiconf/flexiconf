@@ -2,14 +2,14 @@ package se.blea.flexiconf
 
 
 /** Tree node containing a directive and arguments that satisfy it */
-private[flexiconf] case class ConfigNode(private[flexiconf] val directive: DirectiveDefinition,
-                                         private[flexiconf] val arguments: List[Argument],
-                                         private[flexiconf] val source: Source,
+private[flexiconf] case class ConfigNode(directive: DirectiveDefinition,
+                                         arguments: List[Argument],
+                                         source: Source,
                                          children: List[ConfigNode] = List.empty) {
 
-  if (arguments.map(_.kind) != directive.parameters.map(_.kind)) {
-    throw new IllegalStateException(s"Argument count and types must match parameter count and types: " +
-      s"expected ${directive.parameters.mkString(" ")} but got ${arguments.mkString(" ")}")
+  if (arguments.size != directive.parameters.size) {
+    throw new IllegalStateException(s"Argument count must match parameter count: " +
+      s"expected ${directive.parameters.size} but got ${arguments.size}")
   }
 
   /** The node is named after the directive */
@@ -17,6 +17,9 @@ private[flexiconf] case class ConfigNode(private[flexiconf] val directive: Direc
 
   /** Return allowed directives within this scope */
   val allowedDirectives = directive.children
+
+  /** Return allowed arguments for this directive */
+  val allowedArguments = directive.parameters
 
   /** True if the node is for an built-in directive */
   val isInternalNode = name.startsWith("$")

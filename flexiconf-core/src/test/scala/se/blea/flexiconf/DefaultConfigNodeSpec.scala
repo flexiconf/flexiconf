@@ -7,8 +7,12 @@ class DefaultConfigNodeSpec extends FlatSpec with Matchers with ConfigHelpers {
 
   it should "prevent mismatching arguments for parameters" in {
     intercept[IllegalStateException] {
-      val d = DirectiveDefinition.withName("foo").withIntArg("val").build
-      val node = ConfigNode(d, List(StringArgument("123")), Source("test", 1, 0))
+      val d = DirectiveDefinition.withName("foo")
+        .withIntArg("val")
+        .withIntArg("bar")
+        .build
+
+      ConfigNode(d, List(StringArgument("123")), Source("test", 1, 0))
     }
   }
 

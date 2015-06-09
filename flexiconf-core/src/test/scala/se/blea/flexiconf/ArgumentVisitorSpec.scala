@@ -34,70 +34,70 @@ class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     val ctx = parse("\"foo\"").argument()
     val result = ArgumentVisitor(ctx)
     assert(result(0).kind == StringArgument)
-    assert(result(0).value == "foo")
+    assert(result(0).originalValue == "foo")
   }
 
   it should "return string arguments for double quoted string arguments with escaped quotes in them" in {
     val ctx = parse("\"foo bar\\t \\r \\n \\\\ \\\"\"").argument()
     val result = ArgumentVisitor(ctx)
     assert(result(0).kind == StringArgument)
-    assert(result(0).value == "foo bar\\t \\r \\n \\\\ \\\"")
+    assert(result(0).originalValue == "foo bar\\t \\r \\n \\\\ \\\"")
   }
 
   it should "return string arguments for single quoted string arguments with escaped quotes in them" in {
     val ctx = parse("'foo bar\\t \\r \\n \\\\ \\''").argument()
     val result = ArgumentVisitor(ctx)
     assert(result(0).kind == StringArgument)
-    assert(result(0).value == "foo bar\\t \\r \\n \\\\ \\'")
+    assert(result(0).originalValue == "foo bar\\t \\r \\n \\\\ \\'")
   }
 
   it should "return string arguments for quoted string arguments with escaped slashes in them" in {
     val ctx = parse("'foo bar\\t \\r \\n \\\\ \\'\\\\'").argument()
     val result = ArgumentVisitor(ctx)
     assert(result(0).kind == StringArgument)
-    assert(result(0).value == "foo bar\\t \\r \\n \\\\ \\'\\\\")
+    assert(result(0).originalValue == "foo bar\\t \\r \\n \\\\ \\'\\\\")
   }
 
   it should "return string arguments for unquoted string arguments" in {
     val ctx = parse("foo").argument()
     val result = ArgumentVisitor(ctx)
     assert(result(0).kind == StringArgument)
-    assert(result(0).value == "foo")
+    assert(result(0).originalValue == "foo")
   }
 
   it should "visit quoted booleans and return string arguments" in {
     val result = ArgumentVisitor(parse("\"off\"").argument)
     assert(result(0).kind == StringArgument)
-    assert(result(0).value == "off")
+    assert(result(0).originalValue == "off")
   }
 
   it should "return boolean arguments for boolean values" in {
     val result = ArgumentVisitor(parse("on").argument)
     assert(result(0).kind == BoolArgument)
-    assert(result(0).value == "on")
+    assert(result(0).originalValue == "on")
   }
 
   it should "return integer arguments for integer values" in {
     val result = ArgumentVisitor(parse("10001").argument)
     assert(result(0).kind == IntArgument)
-    assert(result(0).value == "10001")
+    assert(result(0).originalValue == "10001")
   }
 
   it should "return decimal arguments for decimal values" in {
     val result = ArgumentVisitor(parse("0.300").argument)
     assert(result(0).kind == DecimalArgument)
-    assert(result(0).value == "0.300")
+    assert(result(0).originalValue == "0.300")
   }
 
   it should "return duration arguments for duration values" in {
     val result = ArgumentVisitor(parse("10s").argument)
     assert(result(0).kind == DurationArgument)
-    assert(result(0).value == "10s")
+    assert(result(0).originalValue == "10s")
   }
 
   it should "return percentage arguments for percentage values" in {
     val result = ArgumentVisitor(parse("10%").argument)
     assert(result(0).kind == PercentageArgument)
-    assert(result(0).value == "10%")
+    assert(result(0).originalValue == "10%")
   }
 }

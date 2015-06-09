@@ -5,15 +5,6 @@ import se.blea.flexiconf
 import se.blea.flexiconf._
 
 class DirectiveSpec extends FlatSpec with Matchers {
-  val dd = DirectiveDefinition.withName("directive")
-    .withStringArg("string")
-    .withIntArg("int")
-    .withBoolArg("boolean")
-    .withDecimalArg("decimal")
-    .withPercentageArg("percentage")
-    .withDurationArg("duration")
-    .build
-
   val arguments = List(
     flexiconf.Argument("foo", StringArgument, "string"),
     flexiconf.Argument("123", IntArgument, "int"),
@@ -26,13 +17,22 @@ class DirectiveSpec extends FlatSpec with Matchers {
   val d1 = DirectiveDefinition.withName("foo").build
   val d2 = DirectiveDefinition.withName("bar").build
   val d3 = DirectiveDefinition.withName("baz").build
-  val root = DirectiveDefinition.root(d1, d2, d3)
+
+  val root = DirectiveDefinition.withName("directive")
+    .withStringArg("string")
+    .withIntArg("int")
+    .withBoolArg("boolean")
+    .withDecimalArg("decimal")
+    .withPercentageArg("percentage")
+    .withDurationArg("duration")
+    .withDirectives(d1, d2, d3)
+    .build
 
   val node1 = ConfigNode(d1, List.empty, Source("-", 0, 0))
   val node2 = ConfigNode(d2, List.empty, Source("-", 0, 0))
   val node3 = ConfigNode(d3, List.empty, Source("-", 0, 0))
 
-  val rootNode = ConfigNode(dd, arguments, Source("-", 0, 0))
+  val rootNode = ConfigNode(root, arguments, Source("-", 0, 0))
     .copy(children = List(node1, node2, node3))
 
   val directive = new Directive(new DefaultDirective(rootNode))
@@ -86,8 +86,10 @@ class DirectiveSpec extends FlatSpec with Matchers {
     directive.getDirective("foo").getName shouldEqual "foo"
   }
 
-  it should "return null if the directive doesn't exist" in {
-    directive.getDirective("qux") shouldBe null
+  it should "throw an exception if the directive doesn't exist" in {
+    intercept[IllegalStateException] {
+      directive.getDirective("qux")
+    }
   }
 
 
