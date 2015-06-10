@@ -15,7 +15,7 @@ Flexible configuration for JVM projects.
 
 **API**
 - Scala API
-- Java-friendly API
+- Java API
 
 **CLI tooling**
 - Config/schema inspection and debugging
