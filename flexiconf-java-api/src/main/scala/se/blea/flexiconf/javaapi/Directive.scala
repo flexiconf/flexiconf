@@ -11,6 +11,8 @@ class Directive(private val _directive: se.blea.flexiconf.Directive) {
 
   def getDirectives: java.util.List[Directive] = _directive.directives.map(new Directive(_))
 
+  def hasDirective(name: String): java.lang.Boolean = _directive.directives.exists(_.name == name)
+
   @annotation.varargs
   def getDirectives(names: String*): java.util.List[Directive] = _directive.directives(names:_*).map(new Directive(_))
 
@@ -20,6 +22,8 @@ class Directive(private val _directive: se.blea.flexiconf.Directive) {
   private def longArg(name: String): Option[Long] = _directive.argValue(name).longValue
   private def doubleArg(name: String): Option[Double] = _directive.argValue(name).doubleValue
   private def stringArg(name: String): Option[String] = _directive.argValue(name).stringValue
+
+  def hasArg(name: String): java.lang.Boolean = _directive.args.exists(_.name == name)
 
   def getBoolArg(name: String): java.lang.Boolean = boolArg(name).get
   def getBoolArg(name: String, default: java.lang.Boolean): java.lang.Boolean = boolArg(name).getOrElse[Boolean](default)

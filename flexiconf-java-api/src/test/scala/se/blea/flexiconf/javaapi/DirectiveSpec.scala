@@ -57,6 +57,15 @@ class DirectiveSpec extends FlatSpec with Matchers {
     directive.getArgs.get(5).getName shouldEqual "duration"
   }
 
+  behavior of "hasDirective"
+
+  it should "return true for existing directives" in {
+    directive.hasDirective("foo") shouldBe true
+  }
+
+  it should "return false for directives that don't exist" in {
+    directive.hasDirective("qux") shouldBe false
+  }
 
   behavior of "getDirectives"
 
@@ -92,6 +101,15 @@ class DirectiveSpec extends FlatSpec with Matchers {
     }
   }
 
+  behavior of "hasArg"
+
+  it should "return true for existing arguments" in {
+    directive.hasArg("boolean") shouldBe true
+  }
+
+  it should "return false for arguments that don't exist" in {
+    directive.hasArg("non-existent") shouldBe false
+  }
 
   behavior of "argument getters"
 
@@ -117,5 +135,11 @@ class DirectiveSpec extends FlatSpec with Matchers {
 
   it should "return duration argument values" in {
     directive.getDurationArg("duration") shouldEqual 900000
+  }
+
+  it should "throw an exception if the argument doesn't exist" in {
+    intercept[IllegalStateException] {
+      directive.getStringArg("non-existent")
+    }
   }
 }
