@@ -18,6 +18,15 @@ class ConfigSpec extends FlatSpec with Matchers {
 
   val config = new Config(new flexiconf.DefaultConfig(rootNode))
 
+  behavior of "hasDirective"
+
+  it should "return true for existing directives" in {
+    config.contains("foo") shouldBe true
+  }
+
+  it should "return false for directives that don't exist" in {
+    config.contains("qux") shouldBe false
+  }
 
   behavior of "getDirectives"
 
@@ -47,7 +56,10 @@ class ConfigSpec extends FlatSpec with Matchers {
     config.getDirective("foo").getName shouldEqual "foo"
   }
 
-  it should "return null if the directive doesn't exist" in {
-    config.getDirective("qux") shouldBe null
+  it should "throw IllegalStateException if the directive doesn't exist" in {
+    intercept[IllegalStateException] {
+      config.getDirective("qux")
+    }
   }
+
 }

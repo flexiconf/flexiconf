@@ -7,15 +7,15 @@ import scala.collection.JavaConversions._
 class Config(private val _config: se.blea.flexiconf.Config) {
   def getDirectives: java.util.List[Directive] = _config.directives.map(new Directive(_))
 
+
+  def contains(name: String): java.lang.Boolean = _config.contains(name)
+
   @annotation.varargs
   def getDirectives(names: String*): java.util.List[Directive] = _config.directives
     .filter( d => names.contains(d.name) )
     .map(new Directive(_))
 
-  def getDirective(name: String): Directive = _config.directives
-    .find(_.name == name)
-    .map(new Directive(_))
-    .orNull
+  def getDirective(name: String): Directive = new Directive(_config.directive(name))
 
   def getWarnings: java.util.List[String] = _config.warnings
 
