@@ -36,6 +36,6 @@ private[flexiconf] case class DefaultConfig(private val config: ConfigNode) exte
   }
 
   override def contains(name: String) = {
-    directive(name).name != "unknown"
+    directives.exists(_.name == name)
   }
 }

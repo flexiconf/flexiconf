@@ -21,11 +21,11 @@ class ConfigSpec extends FlatSpec with Matchers {
   behavior of "hasDirective"
 
   it should "return true for existing directives" in {
-    config.hasDirective("foo") shouldBe true
+    config.contains("foo") shouldBe true
   }
 
   it should "return false for directives that don't exist" in {
-    config.hasDirective("qux") shouldBe false
+    config.contains("qux") shouldBe false
   }
 
   behavior of "getDirectives"

@@ -60,11 +60,11 @@ class DirectiveSpec extends FlatSpec with Matchers {
   behavior of "hasDirective"
 
   it should "return true for existing directives" in {
-    directive.hasDirective("foo") shouldBe true
+    directive.contains("foo") shouldBe true
   }
 
   it should "return false for directives that don't exist" in {
-    directive.hasDirective("qux") shouldBe false
+    directive.contains("qux") shouldBe false
   }
 
   behavior of "getDirectives"

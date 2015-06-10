@@ -8,8 +8,8 @@ class Config(private val _config: se.blea.flexiconf.Config) {
   def getDirectives: java.util.List[Directive] = _config.directives.map(new Directive(_))
 
 
-  def hasDirective(name: String): java.lang.Boolean = _config.directives.exists(_.name == name)
-  
+  def contains(name: String): java.lang.Boolean = _config.contains(name)
+
   @annotation.varargs
   def getDirectives(names: String*): java.util.List[Directive] = _config.directives
     .filter( d => names.contains(d.name) )

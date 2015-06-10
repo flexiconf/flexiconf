@@ -11,7 +11,7 @@ class Directive(private val _directive: se.blea.flexiconf.Directive) {
 
   def getDirectives: java.util.List[Directive] = _directive.directives.map(new Directive(_))
 
-  def hasDirective(name: String): java.lang.Boolean = _directive.directives.exists(_.name == name)
+  def contains(name: String): java.lang.Boolean = _directive.contains(name)
 
   @annotation.varargs
   def getDirectives(names: String*): java.util.List[Directive] = _directive.directives(names:_*).map(new Directive(_))
