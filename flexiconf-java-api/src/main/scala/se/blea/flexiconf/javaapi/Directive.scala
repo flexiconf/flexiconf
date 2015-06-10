@@ -23,23 +23,23 @@ class Directive(private val _directive: se.blea.flexiconf.Directive) {
   private def doubleArg(name: String): Option[Double] = _directive.argValue(name).doubleValue
   private def stringArg(name: String): Option[String] = _directive.argValue(name).stringValue
 
-  def hasArg(name: String): java.lang.Boolean = _directive.args.exists(_.name == name)
+  def hasArg(name: String): java.lang.Boolean = _directive.allowsArg(name)
 
-  def getBoolArg(name: String): java.lang.Boolean = boolArg(name).get
+  def getBoolArg(name: String): java.lang.Boolean = boolArg(name).getOrElse[Boolean](false)
   def getBoolArg(name: String, default: java.lang.Boolean): java.lang.Boolean = boolArg(name).getOrElse[Boolean](default)
 
-  def getPercentageArg(name: String): java.lang.Double = doubleArg(name).get
+  def getPercentageArg(name: String): java.lang.Double = doubleArg(name).getOrElse[Double](0.0)
   def getPercentageArg(name: String, default: java.lang.Double): java.lang.Double = doubleArg(name).getOrElse[Double](default)
 
-  def getDecimalArg(name: String): java.lang.Double = doubleArg(name).get
+  def getDecimalArg(name: String): java.lang.Double = doubleArg(name).getOrElse[Double](0.0)
   def getDecimalArg(name: String, default: java.lang.Double): java.lang.Double = doubleArg(name).getOrElse[Double](default)
 
-  def getStringArg(name: String): java.lang.String = stringArg(name).get
+  def getStringArg(name: String): java.lang.String = stringArg(name).getOrElse[String]("")
   def getStringArg(name: String, default: java.lang.String): java.lang.String = stringArg(name).getOrElse[String](default)
 
-  def getIntArg(name: String): java.lang.Long = longArg(name).get
+  def getIntArg(name: String): java.lang.Long = longArg(name).getOrElse[Long](0l)
   def getIntArg(name: String, default: java.lang.Long): java.lang.Long = longArg(name).getOrElse[Long](default)
 
-  def getDurationArg(name: String): java.lang.Long = longArg(name).get
+  def getDurationArg(name: String): java.lang.Long = longArg(name).getOrElse[Long](0l)
   def getDurationArg(name: String, default: java.lang.Long): java.lang.Long = longArg(name).getOrElse[Long](default)
 }

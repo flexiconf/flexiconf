@@ -27,9 +27,13 @@ trait TraversableConfig {
   def directive(names: (String, String, String, String, String, String)): (Directive, Directive, Directive, Directive, Directive, Directive) =
     (directive(names._1), directive(names._2), directive(names._3), directive(names._4), directive(names._5), directive(names._6))
 
-  /** Returns whether or not this directive exists within this context **/
+  /** Returns whether or not the named directive exists within this context **/
   def contains(name: String) : Boolean
   def ?(name: String)  = contains(name)
+
+  /** Returns whether or not the named directive is allowed within this context **/
+  def allows(name: String): Boolean
+  def ??(name: String): Boolean = allows(name)
 
   /** Operators for alternative traversal of configuration **/
   def \(name: String) = directive(name)

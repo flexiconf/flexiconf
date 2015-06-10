@@ -65,9 +65,11 @@ private[flexiconf] case class DefaultDirective(private val node: ConfigNode) ext
 
   override def args: List[Argument] = node.arguments
 
-  override def contains(name: String) = {
-    directives.exists(_.name == name)
-  }
+  override def contains(name: String) = directives.exists(_.name == name)
+  override def containsArg(name: String) = args.exists(_.name == name)
+
+  override def allows(name: String) = allowedDirectives.contains(name)
+  override def allowsArg(name: String) = allowedArguments.contains(name)
 
   override def directive(name: String): Directive = {
     if (allowedDirectives.contains(name)) {

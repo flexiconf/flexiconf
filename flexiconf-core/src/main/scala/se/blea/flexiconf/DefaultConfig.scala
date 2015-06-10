@@ -35,7 +35,6 @@ private[flexiconf] case class DefaultConfig(private val config: ConfigNode) exte
     }
   }
 
-  override def contains(name: String) = {
-    directives.exists(_.name == name)
-  }
+  override def contains(name: String) = directives.exists(_.name == name)
+  override def allows(name: String) = allowedDirectives.contains(name)
 }

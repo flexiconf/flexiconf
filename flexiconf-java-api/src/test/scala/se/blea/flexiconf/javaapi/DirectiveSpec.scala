@@ -16,7 +16,9 @@ class DirectiveSpec extends FlatSpec with Matchers {
 
   val d1 = DirectiveDefinition.withName("foo").build
   val d2 = DirectiveDefinition.withName("bar").build
-  val d3 = DirectiveDefinition.withName("baz").build
+  val d3 = DirectiveDefinition.withName("baz")
+    .withStringArg("arg1")
+    .build
 
   val root = DirectiveDefinition.withName("directive")
     .withStringArg("string")
@@ -30,10 +32,9 @@ class DirectiveSpec extends FlatSpec with Matchers {
 
   val node1 = ConfigNode(d1, List.empty, Source("-", 0, 0))
   val node2 = ConfigNode(d2, List.empty, Source("-", 0, 0))
-  val node3 = ConfigNode(d3, List.empty, Source("-", 0, 0))
 
   val rootNode = ConfigNode(root, arguments, Source("-", 0, 0))
-    .copy(children = List(node1, node2, node3))
+    .copy(children = List(node1, node2))
 
   val directive = new Directive(new DefaultDirective(rootNode))
 
@@ -74,14 +75,13 @@ class DirectiveSpec extends FlatSpec with Matchers {
   }
 
   it should "return wrapped directives" in {
-    directive.getDirectives.size() shouldEqual 3
+    directive.getDirectives.size() shouldEqual 2
     directive.getDirectives.get(0).isInstanceOf[flexiconf.javaapi.Directive] shouldBe true
   }
 
   it should "return filtered directives in order" in {
-    directive.getDirectives("foo", "baz").size() shouldEqual 2
+    directive.getDirectives("foo", "baz").size() shouldEqual 1
     directive.getDirectives("foo", "baz").get(0).getName shouldEqual "foo"
-    directive.getDirectives("foo", "baz").get(1).getName shouldEqual "baz"
   }
 
 
@@ -93,6 +93,11 @@ class DirectiveSpec extends FlatSpec with Matchers {
 
   it should "return a single directive" in {
     directive.getDirective("foo").getName shouldEqual "foo"
+  }
+
+  it should "return a null directive if the directive is allowed but doesn't exist" in {
+    directive.getDirective("baz").getName shouldEqual "unknown"
+
   }
 
   it should "throw an exception if the directive doesn't exist" in {
@@ -107,11 +112,25 @@ class DirectiveSpec extends FlatSpec with Matchers {
     directive.hasArg("boolean") shouldBe true
   }
 
+  it should "return true for arguments that exist on null directives" in {
+    directive.getDirective("baz").hasArg("arg1") shouldBe true
+  }
+
   it should "return false for arguments that don't exist" in {
     directive.hasArg("non-existent") shouldBe false
   }
 
   behavior of "argument getters"
+
+  it should "return zero values for getting arguments on null directives" in {
+    directive.getDirective("baz").getStringArg("arg1") shouldEqual ""
+  }
+
+  it should "throw an exception if the argument doesn't exist on null directives" in {
+    intercept[IllegalStateException] {
+      directive.getDirective("baz").getStringArg("non-existent")
+    }
+  }
 
   it should "return boolean argument values" in {
     directive.getBoolArg("boolean") shouldEqual false

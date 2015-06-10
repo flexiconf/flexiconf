@@ -16,6 +16,10 @@ trait Directive extends TraversableConfig {
   def or(other: ArgumentValue): ArgumentValue = apply | other
   def |(other: ArgumentValue) = or(other)
 
+  /** Returns whether an argument is allowed and contained for this directive **/
+  def allowsArg(name: String): Boolean
+  def containsArg(name: String): Boolean
+
   /** Find an argument by name **/
   def argValue(name: String): ArgumentValue
 
