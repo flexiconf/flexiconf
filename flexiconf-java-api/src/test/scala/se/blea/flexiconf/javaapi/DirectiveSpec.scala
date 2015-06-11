@@ -80,8 +80,9 @@ class DirectiveSpec extends FlatSpec with Matchers {
   }
 
   it should "return filtered directives in order" in {
-    directive.getDirectives("foo", "baz").size() shouldEqual 1
-    directive.getDirectives("foo", "baz").get(0).getName shouldEqual "foo"
+    directive.getDirectives("foo", "bar").size() shouldEqual 2
+    directive.getDirectives("foo", "bar").get(0).getName shouldEqual "foo"
+    directive.getDirectives("foo", "bar").get(1).getName shouldEqual "bar"
   }
 
 
