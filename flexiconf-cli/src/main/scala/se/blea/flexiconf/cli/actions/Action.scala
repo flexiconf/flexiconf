@@ -1,7 +1,7 @@
 package se.blea.flexiconf.cli.actions
 
 import se.blea.flexiconf.cli.CLI
-import se.blea.flexiconf.{Config, ConfigOptions, Parser, SchemaOptions}
+import se.blea.flexiconf._
 
 /**
  * Created by tblease on 5/23/15.
@@ -12,7 +12,7 @@ trait Action {
   def name: String
   def usage: String
 
-  def parseWithWarnings(configPath: String, schemaPath: String, fn: Config => Unit) = {
+  def parseWithWarnings(configPath: String, schemaPath: String, fn: Config => Unit): Unit = {
     for {
       schemaOpts <- Some(SchemaOptions.withSourceFile(schemaPath))
       schema <- parseSchema(schemaOpts)
@@ -29,15 +29,15 @@ trait Action {
     }
   }
 
-  def parseSchema(opts: SchemaOptions) = {
+  def parseSchema(opts: SchemaOptions): Option[Schema] = {
     Parser.parseSchema(opts)
   }
 
-  def parseConfig(opts: ConfigOptions) = {
+  def parseConfig(opts: ConfigOptions): Option[Config] = {
     Parser.parseConfig(opts)
   }
 
-  def exitWithUsageError() = {
+  def exitWithUsageError(): Unit = {
     CLI.exit(s"action $name requires args: $usage", 1)
   }
 }

@@ -102,7 +102,7 @@ private[flexiconf] case class SchemaVisitor(options: SchemaVisitorOptions,
   }
 
   /** Records a group of directives with the given name in the current frame */
-  def addGroup(name: String, directives: DirectiveListContext) = {
+  def addGroup(name: String, directives: DirectiveListContext): Unit = {
     visitorCtx.addGroup(stack.peek.get, name, directives)
   }
 

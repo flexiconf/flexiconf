@@ -5,8 +5,8 @@ import se.blea.flexiconf._
 
 /** Java-friendly wrapper for the Argument API */
 class Argument(private val _arg: se.blea.flexiconf.Argument) {
-  def getName = _arg.name
-  def getKind = _arg.kind match {
+  def getName: String = _arg.name
+  def getKind: ArgumentKind = _arg.kind match {
     case StringArgument => ArgumentKind.String
     case IntArgument => ArgumentKind.Int
     case BoolArgument => ArgumentKind.Bool

@@ -5,8 +5,8 @@ import org.scalatest.{FlatSpec, Matchers}
 /** Test cases for Arguments */
 class ArgumentSpec extends FlatSpec with Matchers {
 
-  def accepts(v: String)(implicit a: ArgumentKind[_]) = assert(a accepts v)
-  def rejects(v: String)(implicit a: ArgumentKind[_]) = assert(!(a accepts v))
+  private def accepts(v: String)(implicit a: ArgumentKind[_]) = assert(a accepts v)
+  private def rejects(v: String)(implicit a: ArgumentKind[_]) = assert(!(a accepts v))
 
   behavior of "StringArument"
 

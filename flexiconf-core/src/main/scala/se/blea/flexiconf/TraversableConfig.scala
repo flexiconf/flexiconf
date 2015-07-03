@@ -28,22 +28,25 @@ trait TraversableConfig {
     (directive(names._1), directive(names._2), directive(names._3), directive(names._4), directive(names._5), directive(names._6))
 
   /** Returns whether or not the named directive exists within this context **/
-  def contains(name: String) : Boolean
-  def ?(name: String)  = contains(name)
+  def contains(name: String): Boolean
+  def ?(name: String): Boolean = contains(name) // scalastyle:ignore method.name
 
   /** Returns whether or not the named directive is allowed within this context **/
+  // scalastyle:off method.name
   def allows(name: String): Boolean
-  def ??(name: String): Boolean = allows(name)
+  def ??(name: String): Boolean = allows(name) // scalastyle:ignore method.name
 
   /** Operators for alternative traversal of configuration **/
-  def \(name: String) = directive(name)
-  def \(names: (String, String)) = directive(names)
-  def \(names: (String, String, String)) = directive(names)
-  def \(names: (String, String, String, String)) = directive(names)
-  def \(names: (String, String, String, String, String)) = directive(names)
-  def \(names: (String, String, String, String, String, String)) = directive(names)
-  def \\ = directives
-  def \\(names: String*) = directives(names:_*)
+  // scalastyle:off method.name
+  def \(name: String): Directive = directive(name)
+  def \(names: (String, String)): (Directive, Directive) = directive(names)
+  def \(names: (String, String, String)): (Directive, Directive, Directive) = directive(names)
+  def \(names: (String, String, String, String)): (Directive, Directive, Directive, Directive) = directive(names)
+  def \(names: (String, String, String, String, String)): (Directive, Directive, Directive, Directive, Directive) = directive(names)
+  def \(names: (String, String, String, String, String, String)): (Directive, Directive, Directive, Directive, Directive, Directive) = directive(names)
+  def \\ : List[Directive] = directives
+  def \\(names: String*): List[Directive] = directives(names:_*)
+  // scalastyle:on method.name
 
   /** Return all warnings for this directive and its children **/
   def warnings: List[String]

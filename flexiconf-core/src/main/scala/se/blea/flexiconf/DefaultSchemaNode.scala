@@ -49,7 +49,7 @@ private[flexiconf] case class DefaultSchemaNode(name: String,
       .build
   }
 
-  override def toString = {
+  override def toString: String = {
     var res = name
 
     if (parameters.nonEmpty) {

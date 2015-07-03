@@ -9,7 +9,7 @@ trait DirectiveFlag {
 
 /** Flags that affect how directives should be handled when creating the final configuration tree */
 case class DirectiveFlags(flags: Set[DirectiveFlag] = Set.empty) {
-  def allowOnce = flags.contains(DirectiveFlags.AllowOnce)
+  def allowOnce: Boolean = flags.contains(DirectiveFlags.AllowOnce)
 
   override def toString: String = {
     flags.mkString("[", ",", "]")
@@ -20,7 +20,7 @@ case class DirectiveFlags(flags: Set[DirectiveFlag] = Set.empty) {
 /** Collection of valid flags */
 object DirectiveFlags {
   object AllowOnce extends DirectiveFlag {
-    override def documentation = "Allow a directive to be specified only once in a surrounding context"
+    override def documentation: String = "Allow a directive to be specified only once in a surrounding context"
     override def toString: String = "once"
   }
 }

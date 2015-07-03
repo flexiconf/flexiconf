@@ -190,7 +190,7 @@ class ConfigVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
   behavior of "#visitDirectives"
 
   it should "return an empty list of directives when visiting an empty directive list" in {
-    val result = visitor(defaultOptions).visitDirectives(null)
+    val result = visitor(defaultOptions).visitDirectives
 
     assert(result.size == 0)
   }

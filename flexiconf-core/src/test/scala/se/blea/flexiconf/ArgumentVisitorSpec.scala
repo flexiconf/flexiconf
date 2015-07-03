@@ -8,11 +8,12 @@ class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
   behavior of "#apply"
 
   it should "return an empty list of arguments when visiting an empty argument lists" in {
-    val result = ArgumentVisitor(null)
+    val result = ArgumentVisitor.apply
     assert(result.size == 0)
   }
 
   it should "return list of arguments when visiting argument lists" in {
+    // scalastyle:off magic.number
     val ctx = parse( """1 off "true" 500.2 foo bar 100ms 25% -600""")
     val result = ArgumentVisitor(ctx.argumentList)
 
@@ -28,6 +29,7 @@ class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     assert(result(6).kind == DurationArgument)
     assert(result(7).kind == PercentageArgument)
     assert(result(8).kind == IntArgument)
+    // scalastyle:on magic.number
   }
 
   it should "return string arguments for quoted string arguments" in {

@@ -9,10 +9,10 @@ private[flexiconf] case class DefaultConfig(private val config: ConfigNode) exte
   private lazy val collapsedDirectives = collapsedConfig.children.map(new DefaultDirective(_))
   private lazy val allowedDirectives = collapsedConfig.allowedDirectives.map(_.name)
 
-  override def renderTree = collapsedConfig.children.map(_.renderTree()).mkString("")
+  override def renderTree: String = collapsedConfig.children.map(_.renderTree()).mkString("")
   override private[flexiconf] def renderDebugTree = config.children.map(_.renderTree()).mkString("")
 
-  override def warnings = config.warnings
+  override def warnings: List[String] = config.warnings
 
   override def directive(name: String): Directive = {
     if (allowedDirectives.contains(name)) {
@@ -35,6 +35,6 @@ private[flexiconf] case class DefaultConfig(private val config: ConfigNode) exte
     }
   }
 
-  override def contains(name: String) = directives.exists(_.name == name)
-  override def allows(name: String) = allowedDirectives.contains(name)
+  override def contains(name: String): Boolean = directives.exists(_.name == name)
+  override def allows(name: String): Boolean = allowedDirectives.contains(name)
 }

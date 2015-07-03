@@ -37,9 +37,9 @@ class Directive(private val _directive: se.blea.flexiconf.Directive) {
   def getStringArg(name: String): java.lang.String = stringArg(name).getOrElse[String]("")
   def getStringArg(name: String, default: java.lang.String): java.lang.String = stringArg(name).getOrElse[String](default)
 
-  def getIntArg(name: String): java.lang.Long = longArg(name).getOrElse[Long](0l)
+  def getIntArg(name: String): java.lang.Long = longArg(name).getOrElse[Long](0L)
   def getIntArg(name: String, default: java.lang.Long): java.lang.Long = longArg(name).getOrElse[Long](default)
 
-  def getDurationArg(name: String): java.lang.Long = longArg(name).getOrElse[Long](0l)
+  def getDurationArg(name: String): java.lang.Long = longArg(name).getOrElse[Long](0L)
   def getDurationArg(name: String, default: java.lang.Long): java.lang.Long = longArg(name).getOrElse[Long](default)
 }

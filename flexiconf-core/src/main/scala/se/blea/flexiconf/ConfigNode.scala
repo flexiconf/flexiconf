@@ -65,7 +65,7 @@ private[flexiconf] case class ConfigNode(directive: DirectiveDefinition,
     sb.mkString
   }
 
-  override def toString = {
+  override def toString: String = {
     var res = name
 
     if (arguments.nonEmpty) {

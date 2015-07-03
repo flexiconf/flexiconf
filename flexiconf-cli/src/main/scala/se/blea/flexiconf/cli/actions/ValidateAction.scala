@@ -1,5 +1,7 @@
 package se.blea.flexiconf.cli.actions
 
+import se.blea.flexiconf.cli.CLI
+
 /** Validate a provided configuration and schema */
 object ValidateAction extends Action {
   override def name: String = "validate"
@@ -16,10 +18,10 @@ object ValidateAction extends Action {
 
     parseWithWarnings(configPath, schemaPath, { config =>
       if (config.warnings.length == 0) {
-        println("OK")
+        CLI.out("OK")
       } else {
-        Console.err.println("Failed:")
-        config.warnings.foreach(r => Console.err.println(s"- $r"))
+        CLI.err("Failed:")
+        config.warnings.foreach(r => CLI.err(s"- $r"))
       }
     })
   }

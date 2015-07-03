@@ -1,5 +1,6 @@
 package se.blea.flexiconf
 
+import java.io.File
 import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
 
@@ -8,7 +9,7 @@ import scala.collection.mutable.ListBuffer
 
 /** Helpers for visitors */
 object FileUtil {
-  def resolvePathsForGlob(basePath: String, pattern: String) = {
+  def resolvePathsForGlob(basePath: String, pattern: String): List[String] = {
     val resolvedPattern = if (pattern.startsWith("/")) {
       pattern
     } else {
@@ -32,7 +33,7 @@ object FileUtil {
   }
 
   /** Resolve a file path for includes based on the location of the current file **/
-  def resolvePath(basePath: String, path: String) = {
+  def resolvePath(basePath: String, path: String): Path = {
     Paths.get(basePath).resolveSibling(path).normalize
   }
 }

@@ -1,5 +1,7 @@
 package se.blea.flexiconf.cli.actions
 
+import se.blea.flexiconf.cli.CLI
+
 /** Print an internal representation of a configuration tree */
 object DebugAction extends Action {
   override def name: String = "debug"
@@ -15,11 +17,11 @@ object DebugAction extends Action {
     val schemaPath = args(1)
 
     parseWithWarnings(configPath, schemaPath, { config =>
-      println(config.renderDebugTree)
+      CLI.out(config.renderDebugTree)
 
       if (config.warnings.nonEmpty) {
-        println("Warnings:")
-        config.warnings.foreach(w => println(s"- $w"))
+        CLI.out("Warnings:")
+        config.warnings.foreach(w => CLI.out(s"- $w"))
       }
     })
   }

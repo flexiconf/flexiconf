@@ -9,6 +9,8 @@ object OptionParser {
     */
   type OptionParserFunction[T] = (T => PartialFunction[List[String], (T, List[String])])
 
+  type OptionParseResult[T] = (T, List[String])
+
   /** Parse options from a list of arguments, stops parsing options after the first detected argument
     *
     * @param arguments List of arguments to parse
@@ -17,7 +19,7 @@ object OptionParser {
     * @tparam T Type representing your options
     * @return Tuple container parsed options and non-option arguments
     */
-  def apply[T](arguments: List[String], defaultOpts: T, optsParser: OptionParserFunction[T]) = {
+  def apply[T](arguments: List[String], defaultOpts: T, optsParser: OptionParserFunction[T]): OptionParseResult[T] = {
     def parse(remainingArgs: List[String],
               capturedArgs: List[String],
               opts: T,
@@ -29,10 +31,12 @@ object OptionParser {
         val (newOpts, xs) = parser(remainingArgs)
 
         parse(xs, capturedArgs, newOpts, optsParser, shouldParseOpts)
-      } else remainingArgs match {
-        case x :: xs if shouldParseOpts && x.startsWith("-") => throw new Exception(s"unknown option: $x")
-        case x :: xs => parse(xs, capturedArgs :+ x, opts, optsParser, shouldParseOpts = false)
-        case _ => (opts, capturedArgs)
+      } else {
+        remainingArgs match {
+          case x :: xs if shouldParseOpts && x.startsWith("-") => throw new Exception(s"unknown option: $x")
+          case x :: xs => parse(xs, capturedArgs :+ x, opts, optsParser, shouldParseOpts = false)
+          case _ => (opts, capturedArgs)
+        }
       }
     }
 

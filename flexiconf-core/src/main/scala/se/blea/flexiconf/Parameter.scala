@@ -8,11 +8,8 @@ import scala.collection.JavaConversions._
 
 /** Container for defining the arguments a directive accepts: requires a name and type */
 case class Parameter(name: String, kind: ArgumentKind[_] = StringArgument) {
-  override def toString = s"$name:$kind"
+  override def toString: String = s"$name:$kind"
 }
-
-
-
 
 /** Returns a Parameter for a given single or list of ParameterContext */
 private[flexiconf] object ParameterVisitor extends SchemaParserBaseVisitor[Parameter] {

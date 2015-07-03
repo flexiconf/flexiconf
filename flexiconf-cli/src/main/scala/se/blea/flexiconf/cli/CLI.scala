@@ -1,5 +1,7 @@
 package se.blea.flexiconf.cli
 
+import java.io.{PrintStream, OutputStream}
+
 import se.blea.flexiconf.cli.actions._
 
 object CLI {
@@ -13,7 +15,7 @@ object CLI {
     DebugAction
   )
 
-  def usage = {
+  private def usage = {
     val padLen = 2 + actions.map(_.name)
       .maxBy(_.length)
       .length
@@ -56,8 +58,14 @@ object CLI {
     }
   }
 
+  def outStream: PrintStream = Console.out
+  def errStream: PrintStream = Console.err
+
+  def out(message: String): Unit = outStream.println(message) // scalastyle:ignore
+  def err(message: String): Unit = errStream.println(message) // scalastyle:ignore
+
   def exit(reason: String, code: Int = 0): Unit = {
-    Console.err.println(reason)
+    err(reason)
     System.exit(code)
   }
 }

@@ -20,9 +20,9 @@ case object BoolArgument extends ArgumentKind[Boolean] {
   val boolFalsePattern = "off|no|n|false"
   val boolPattern = boolTruePattern ++ "|" ++ boolFalsePattern
 
-  override def accepts(value: String) = value.toLowerCase matches boolPattern
-  override def valueOf(value: String) = BoolValue(value.toLowerCase matches boolTruePattern)
-  override def toString = "Bool"
+  override def accepts(value: String): Boolean = value.toLowerCase matches boolPattern
+  override def valueOf(value: String): ArgumentValue = BoolValue(value.toLowerCase matches boolTruePattern)
+  override def toString: String = "Bool"
 }
 
 
@@ -30,9 +30,9 @@ case object BoolArgument extends ArgumentKind[Boolean] {
 case object IntArgument extends ArgumentKind[Long] {
   val intPattern = "(-?(?:0|[1-9]\\d*))"
 
-  override def accepts(value: String) = value matches intPattern
-  override def valueOf(value: String) = LongValue(value.toLong)
-  override def toString = "Int"
+  override def accepts(value: String): Boolean = value matches intPattern
+  override def valueOf(value: String): ArgumentValue = LongValue(value.toLong)
+  override def toString: String = "Int"
 }
 
 
@@ -40,9 +40,9 @@ case object IntArgument extends ArgumentKind[Long] {
 case object DecimalArgument extends ArgumentKind[Double] {
   val decimalPattern = "(-?(?:0|[1-9]\\d*))(\\.\\d+)?"
 
-  override def accepts(value: String) = value matches decimalPattern
-  override def valueOf(value: String) = DoubleValue(value.toDouble)
-  override def toString = "Decimal"
+  override def accepts(value: String): Boolean = value matches decimalPattern
+  override def valueOf(value: String): ArgumentValue = DoubleValue(value.toDouble)
+  override def toString: String = "Decimal"
 }
 
 
@@ -50,21 +50,21 @@ case object DecimalArgument extends ArgumentKind[Double] {
 case object DurationArgument extends ArgumentKind[Long] {
   val durationPattern = "(-?(?:0|[1-9]\\d*)(?:\\.\\d+)?)(ms|s|m|h|d|w|M|y)".r
   val multipliers = Map(
-    "ms" -> 1l,
-    "s"  -> 1000l,
-    "m"  -> 60000l,
-    "h"  -> 3600000l,
-    "d"  -> 86400000l,
-    "w"  -> 604800000l,
-    "M"  -> 26297460000l,
-    "y"  -> 315569520000l)
+    "ms" -> 1L,
+    "s"  -> 1000L,
+    "m"  -> 60000L,
+    "h"  -> 3600000L,
+    "d"  -> 86400000L,
+    "w"  -> 604800000L,
+    "M"  -> 26297460000L,
+    "y"  -> 315569520000L)
 
-  override def accepts(value: String) = durationPattern.pattern.matcher(value).matches
-  override def valueOf(value: String) = value match {
-    case durationPattern(amount, unit) => LongValue((amount.toDouble * multipliers.getOrElse(unit, 1l)).toLong)
+  override def accepts(value: String): Boolean = durationPattern.pattern.matcher(value).matches
+  override def valueOf(value: String): ArgumentValue = value match {
+    case durationPattern(amount, unit) => LongValue((amount.toDouble * multipliers.getOrElse(unit, 1L)).toLong)
     case _ => throw new IllegalStateException(s"Can't get duration value from $value")
   }
-  override def toString = "Duration"
+  override def toString: String = "Duration"
 }
 
 
@@ -72,26 +72,26 @@ case object DurationArgument extends ArgumentKind[Long] {
 case object PercentageArgument extends ArgumentKind[Double] {
   val percentagePattern = "(-?(?:0|[1-9]\\d*)(?:\\.\\d+)?)%".r
 
-  override def accepts(value: String) = percentagePattern.pattern.matcher(value).matches
-  override def valueOf(value: String) = value match {
+  override def accepts(value: String): Boolean = percentagePattern.pattern.matcher(value).matches
+  override def valueOf(value: String): ArgumentValue = value match {
     case percentagePattern(amount) => DoubleValue(amount.toDouble / 100)
     case _ => throw new IllegalStateException(s"Can't get percentage value from $value")
   }
-  override def toString = "Percentage"
+  override def toString: String = "Percentage"
 }
 
 
 /** String values */
 case object StringArgument extends ArgumentKind[String] {
-  override def accepts(value: String) = true
-  override def valueOf(value: String) = StringValue(value)
-  override def toString = "String"
+  override def accepts(value: String): Boolean = true
+  override def valueOf(value: String): ArgumentValue = StringValue(value)
+  override def toString: String = "String"
 }
 
 
 /** Unknown values */
 case object UnknownArgument extends ArgumentKind[Unit] {
-  override def accepts(value: String) = true
-  override def valueOf(value: String) = NullValue
-  override def toString = "Unknown"
+  override def accepts(value: String): Boolean = true
+  override def valueOf(value: String): ArgumentValue = NullValue
+  override def toString: String = "Unknown"
 }

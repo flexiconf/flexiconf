@@ -4,12 +4,6 @@ import org.scalatest.{Matchers, FlatSpec}
 
 /** Test cases for Directive.Builder */
 class DirectiveBuilderSpec extends FlatSpec with Matchers {
-  it should "disallow null names" in {
-    intercept[NullPointerException] {
-      DirectiveDefinition.withName(null)
-    }
-  }
-
   it should "disallow empty names" in {
     intercept[IllegalArgumentException] {
       DirectiveDefinition.withName("")
@@ -73,12 +67,6 @@ class DirectiveBuilderSpec extends FlatSpec with Matchers {
   it should "allow a directive to not be repeated if only allowed once" in {
     val d = DirectiveDefinition.withName("foo").allowOnce().build
     assert(d.allowOnce)
-  }
-
-  it should "disallow arguments with null names" in {
-    intercept[NullPointerException] {
-      DirectiveDefinition.withName("foo").withBoolArg(null)
-    }
   }
 
   it should "disallow arguments with empty names" in {
