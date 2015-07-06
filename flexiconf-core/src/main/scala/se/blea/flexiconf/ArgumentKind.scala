@@ -28,7 +28,7 @@ case object BoolArgument extends ArgumentKind[Boolean] {
 
 /** Integer values */
 case object IntArgument extends ArgumentKind[Long] {
-  val intPattern = "0|[1-9]\\d*"
+  val intPattern = "(-?(?:0|[1-9]\\d*))"
 
   override def accepts(value: String) = value matches intPattern
   override def valueOf(value: String) = LongValue(value.toLong)
@@ -38,7 +38,7 @@ case object IntArgument extends ArgumentKind[Long] {
 
 /** Decimal values */
 case object DecimalArgument extends ArgumentKind[Double] {
-  val decimalPattern = "(0|[1-9]\\d*)(\\.\\d+)?"
+  val decimalPattern = "(-?(?:0|[1-9]\\d*))(\\.\\d+)?"
 
   override def accepts(value: String) = value matches decimalPattern
   override def valueOf(value: String) = DoubleValue(value.toDouble)
@@ -48,7 +48,7 @@ case object DecimalArgument extends ArgumentKind[Double] {
 
 /** Duration values */
 case object DurationArgument extends ArgumentKind[Long] {
-  val durationPattern = "((?:0|[1-9]\\d*)(?:\\.\\d+)?)(ms|s|m|h|d|w|M|y)".r
+  val durationPattern = "(-?(?:0|[1-9]\\d*)(?:\\.\\d+)?)(ms|s|m|h|d|w|M|y)".r
   val multipliers = Map(
     "ms" -> 1l,
     "s"  -> 1000l,
@@ -70,7 +70,7 @@ case object DurationArgument extends ArgumentKind[Long] {
 
 /** Percentage values */
 case object PercentageArgument extends ArgumentKind[Double] {
-  val percentagePattern = "((?:0|[1-9]\\d*)(?:\\.\\d+)?)%".r
+  val percentagePattern = "(-?(?:0|[1-9]\\d*)(?:\\.\\d+)?)%".r
 
   override def accepts(value: String) = percentagePattern.pattern.matcher(value).matches
   override def valueOf(value: String) = value match {
