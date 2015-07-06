@@ -2,8 +2,8 @@ import sbt.Keys._
 
 // Common settings
 lazy val commonSettings = Seq(
-  scalaVersion := "2.11.2",
-  crossScalaVersions := Seq("2.10.4", "2.11.2"),
+  scalaVersion := "2.11.7",
+  crossScalaVersions := Seq("2.10.5", "2.11.7"),
   organization := "se.blea.flexiconf",
   version := "0.1.1-SNAPSHOT",
 
