@@ -79,9 +79,11 @@ class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     assert(result(0).originalValue == "on")
   }
 
+  // scalastyle:off magic.number
   it should "return integer arguments for integer values" in {
     val result = ArgumentVisitor(parse("10001").argument)(0)
     (result.kind, result.originalValue, result.value) shouldEqual (IntArgument, "10001", LongValue(10001))
+
   }
 
   it should "return integer arguments for negative integer values" in {
@@ -118,4 +120,5 @@ class ArgumentVisitorSpec extends FlatSpec with Matchers with ConfigHelpers {
     val result = ArgumentVisitor(parse("-10%").argument)(0)
     (result.kind, result.originalValue, result.value) shouldEqual (PercentageArgument, "-10%", DoubleValue(-0.1))
   }
+  // scalastyle:on magic.number
 }
