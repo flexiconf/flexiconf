@@ -5,6 +5,6 @@ case class Argument(originalValue: String,
                     kind: ArgumentKind[_] = StringArgument,
                     name: String = "?") {
   val value = kind.valueOf(originalValue)
-  override def toString = s"$name:$kind<$value>"
+  override def toString: String = s"$name:$kind<$value>"
 }
 

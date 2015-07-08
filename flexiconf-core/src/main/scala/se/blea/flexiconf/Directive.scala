@@ -14,7 +14,7 @@ trait Directive extends TraversableConfig {
 
   /** Return the first value, or the other value **/
   def or(other: ArgumentValue): ArgumentValue = apply | other
-  def |(other: ArgumentValue) = or(other)
+  def |(other: ArgumentValue): ArgumentValue = or(other) // scalastyle:ignore method.name
 
   /** Returns whether an argument is allowed and contained for this directive **/
   def allowsArg(name: String): Boolean
@@ -39,16 +39,20 @@ trait Directive extends TraversableConfig {
   def argValue(names: (String, String, String, String, String)): (ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue) =
     (argValue(names._1), argValue(names._2), argValue(names._3), argValue(names._4), argValue(names._5))
 
-  def argValue(names: (String, String, String, String, String, String)): (ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue) =
-    (argValue(names._1), argValue(names._2), argValue(names._3), argValue(names._4), argValue(names._5), argValue(names._6))
+  def argValue(names: (String, String, String, String, String, String)):
+    (ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue) =
+      (argValue(names._1), argValue(names._2), argValue(names._3), argValue(names._4), argValue(names._5), argValue(names._6))
 
   /** Operators for alternative traversal of configuration by name **/
-  def %(name: String) = argValue(name)
-  def %(names: (String, String)) = argValue(names)
-  def %(names: (String, String, String)) = argValue(names)
-  def %(names: (String, String, String, String)) = argValue(names)
-  def %(names: (String, String, String, String, String)) = argValue(names)
-  def %(names: (String, String, String, String, String, String)) = argValue(names)
+  // scalastyle:off method.name
+  def %(name: String): ArgumentValue = argValue(name)
+  def %(names: (String, String)): (ArgumentValue, ArgumentValue) = argValue(names)
+  def %(names: (String, String, String)): (ArgumentValue, ArgumentValue, ArgumentValue) = argValue(names)
+  def %(names: (String, String, String, String)): (ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue) = argValue(names)
+  def %(names: (String, String, String, String, String)): (ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue) = argValue(names)
+  def %(names: (String, String, String, String, String, String)):
+    (ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue, ArgumentValue) = argValue(names)
+  // scalastyle:on method.name
 }
 
 

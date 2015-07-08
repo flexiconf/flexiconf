@@ -1,4 +1,8 @@
-resolvers += "simplytyped" at "http://simplytyped.github.io/repo/releases"
+resolvers ++= Seq(
+  "simplytyped" at "http://simplytyped.github.io/repo/releases",
+  "sonatype-releases" at "https://oss.sonatype.org/content/repositories/releases/")
+
+addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.7.0")
 
 addSbtPlugin("com.simplytyped" % "sbt-antlr4" % "0.7.4")
 

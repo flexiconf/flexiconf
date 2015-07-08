@@ -2,7 +2,7 @@ package se.blea.flexiconf
 
 /** Object that represents missing directives in the config **/
 private[flexiconf] object NullDirective {
-  def apply(definition: DirectiveDefinition) = {
+  def apply(definition: DirectiveDefinition): DefaultDirective = {
     val nullArgs = definition.parameters.map(_ => Argument("", UnknownArgument))
     val nullNode = new ConfigNode(definition.copy(name = "unknown"), nullArgs, Source("-", 0, 0))
     DefaultDirective(nullNode)
@@ -48,9 +48,8 @@ private[flexiconf] object DefaultDirective {
     }
   }
 
-  def directiveNotAllowed = entityNotAllowed("Directive", "Directives", "not allowed in", "allowed")
-
-  def argumentNotAllowed = entityNotAllowed("Argument", "Arguments", "not defined for", "defined")
+  def directiveNotAllowed: IllegalStateExceptionGenerator = entityNotAllowed("Directive", "Directives", "not allowed in", "allowed")
+  def argumentNotAllowed: IllegalStateExceptionGenerator = entityNotAllowed("Argument", "Arguments", "not defined for", "defined")
 }
 
 /** Default implementation of a directive */
@@ -65,11 +64,11 @@ private[flexiconf] case class DefaultDirective(private val node: ConfigNode) ext
 
   override def args: List[Argument] = node.arguments
 
-  override def contains(name: String) = directives.exists(_.name == name)
-  override def containsArg(name: String) = args.exists(_.name == name)
+  override def contains(name: String): Boolean = directives.exists(_.name == name)
+  override def containsArg(name: String): Boolean = args.exists(_.name == name)
 
-  override def allows(name: String) = allowedDirectives.contains(name)
-  override def allowsArg(name: String) = allowedArguments.contains(name)
+  override def allows(name: String): Boolean = allowedDirectives.contains(name)
+  override def allowsArg(name: String): Boolean = allowedArguments.contains(name)
 
   override def directive(name: String): Directive = {
     if (allowedDirectives.contains(name)) {

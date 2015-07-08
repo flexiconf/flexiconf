@@ -8,7 +8,7 @@ import se.blea.flexiconf.parser.gen.{SchemaParser, SchemaLexer}
 
 /** Test cases for Schema */
 class SchemaSpec extends FlatSpec with Matchers {
-  def schema(inputString: String) = {
+  private def schema(inputString: String) = {
     val bytes = inputString.getBytes
     val input = new ANTLRInputStream(new ByteArrayInputStream(bytes))
     val lexer = new SchemaLexer(input)

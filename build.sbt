@@ -54,19 +54,25 @@ lazy val commonSettings = Seq(
   scalacOptions += "-target:jvm-1.7",
 
   // Test options
-  testOptions in Test += Tests.Argument("-oD")
-)
+  testOptions in Test += Tests.Argument("-oD"))
 
 lazy val commonDependencies = Seq(
-  libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test"
-)
+  libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.1" % "test")
 
 lazy val antlr4ConfigSettings = Seq(
   antlr4PackageName in Antlr4 := Some("se.blea.flexiconf.parser.gen"),
   antlr4GenListener in Antlr4 := false,
   antlr4GenVisitor in Antlr4 := true,
-  unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "antlr4"
-)
+  unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "antlr4")
+
+lazy val testScalastyle = taskKey[Unit]("Run scalastyle for main sources as part of test")
+lazy val testScalastyleForTests = taskKey[Unit]("Run scalastyle for test sources as part of test")
+
+lazy val scalastyleSettings = Seq(
+  scalastyleFailOnError := true,
+  testScalastyle := (scalastyle in Compile).toTask("").value,
+  testScalastyleForTests := (scalastyle in Test).toTask("").value,
+  (test in Test) <<= (test in Test).dependsOn(testScalastyle, testScalastyleForTests))
 
 // Root project
 lazy val flexiconf = project.in(file("."))
@@ -86,6 +92,7 @@ lazy val core = project.in(file("flexiconf-core"))
   .settings(commonSettings:_*)
   .settings(antlr4Settings:_*)
   .settings(antlr4ConfigSettings:_*)
+  .settings(scalastyleSettings:_*)
   .settings(commonDependencies:_*)
   .settings(
     libraryDependencies += "commons-io" % "commons-io" % "2.4")
@@ -95,6 +102,7 @@ lazy val docgen = project.in(file("flexiconf-docgen"))
     name := "flexiconf-docgen",
     description := "Documentation generators for flexiconf schemas")
   .settings(commonSettings:_*)
+  .settings(scalastyleSettings:_*)
   .settings(commonDependencies:_*)
   .settings(
     libraryDependencies += "org.pegdown" % "pegdown" % "1.5.0",
@@ -106,6 +114,7 @@ lazy val javaApi = project.in(file("flexiconf-java-api"))
     name := "flexiconf-java-api",
     description := "Java-friendly API for flexiconf schemas and configs")
   .settings(commonSettings:_*)
+  .settings(scalastyleSettings:_*)
   .settings(commonDependencies:_*)
   .dependsOn(core)
 
@@ -114,6 +123,7 @@ lazy val cli = project.in(file("flexiconf-cli"))
     name := "flexiconf-cli",
     description := "CLI utility for working with flexiconf schemas and configs")
   .settings(commonSettings:_*)
+  .settings(scalastyleSettings:_*)
   .settings(commonDependencies:_*)
   .settings(packSettings:_*)
   .settings(

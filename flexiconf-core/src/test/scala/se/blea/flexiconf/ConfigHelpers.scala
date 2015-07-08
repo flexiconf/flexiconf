@@ -8,22 +8,17 @@ import se.blea.flexiconf.parser.gen.{ConfigParser, ConfigLexer, SchemaParser, Sc
 
 /** Helper methods for working with config parsers */
 trait ConfigHelpers {
-  def defaultOptions = ConfigOptions.withSourceFile("test")
+  private[flexiconf] def defaultOptions = ConfigOptions.withSourceFile("test")
+  private[flexiconf] def node(d: DirectiveDefinition): ConfigNode = ConfigNode(d, List.empty, Source("", 0, 0))
+  private[flexiconf] def node(n: String): ConfigNode = node(DirectiveDefinition.withName(n).build)
+  private[flexiconf] def rootNode(ds: DirectiveDefinition*): ConfigNode = node(DirectiveDefinition.root(ds:_*))
+  private[flexiconf] def makeStack(node: ConfigNode) = Stack(List(new ConfigVisitorContext(node)))
+  private[flexiconf] def visitor(opts: ConfigOptions): ConfigVisitor = ConfigVisitor(opts.visitorOpts)
+  private[flexiconf] def visitor(opts: ConfigOptions, stack: Stack[ConfigVisitorContext]): ConfigVisitor = ConfigVisitor(opts.visitorOpts, stack)
+  private[flexiconf] def nodeWithSchema(inputString: String) = node(schema(inputString))
+  private[flexiconf] def emptyStackWithSchema(inputString: String) = makeStack(nodeWithSchema(inputString))
 
-  def node(d: DirectiveDefinition): ConfigNode = ConfigNode(d, List.empty, Source("", 0, 0))
-  def node(n: String): ConfigNode = node(DirectiveDefinition.withName(n).build)
-
-  def rootNode(ds: DirectiveDefinition*): ConfigNode = node(DirectiveDefinition.root(ds:_*))
-
-  def makeStack(node: ConfigNode) = Stack(List(new ConfigVisitorContext(node)))
-
-  def visitor(opts: ConfigOptions): ConfigVisitor = ConfigVisitor(opts.visitorOpts)
-  def visitor(opts: ConfigOptions, stack: Stack[ConfigVisitorContext]): ConfigVisitor = ConfigVisitor(opts.visitorOpts, stack)
-
-  def nodeWithSchema(inputString: String) = node(schema(inputString))
-  def emptyStackWithSchema(inputString: String) = makeStack(nodeWithSchema(inputString))
-
-  def schema(inputString: String) = {
+  private[flexiconf] def schema(inputString: String) = {
     val bytes = inputString.getBytes
     val input = new ANTLRInputStream(new ByteArrayInputStream(bytes))
     val lexer = new SchemaLexer(input)
@@ -37,7 +32,7 @@ trait ConfigHelpers {
     visitor.visitDocument(document).get.toDirective
   }
 
-  def parse(inputString: String) = {
+  private[flexiconf] def parse(inputString: String) = {
     val bytes = inputString.getBytes
     val input = new ANTLRInputStream(new ByteArrayInputStream(bytes))
     val lexer = new ConfigLexer(input)

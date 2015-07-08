@@ -43,21 +43,27 @@ private[flexiconf] case class DirectiveDefinition private[flexiconf](name: Strin
 
 object DirectiveDefinition {
   /** Indicates the start of the configuration tree */
-  private[flexiconf] def root(ds: Set[DirectiveDefinition] = Set.empty) = new DirectiveDefinition(name = "$root", children = ds)
+  private[flexiconf] def root(ds: Set[DirectiveDefinition] = Set.empty) =
+    new DirectiveDefinition(name = "$root", children = ds)
 
-  private[flexiconf] def root(ds: DirectiveDefinition*) = new DirectiveDefinition(name = "$root", children = ds.toSet)
+  private[flexiconf] def root(ds: DirectiveDefinition*) =
+    new DirectiveDefinition(name = "$root", children = ds.toSet)
 
   /** Allows inclusion of multiple, additional configuration trees */
-  private[flexiconf] def include(ds: Set[DirectiveDefinition]) = new DirectiveDefinition(name = "$include", children = ds, parameters = List(Parameter("pattern")))
+  private[flexiconf] def include(ds: Set[DirectiveDefinition]) =
+    new DirectiveDefinition(name = "$include", children = ds, parameters = List(Parameter("pattern")))
 
   /** Defines a group of directives that can be used elsewhere in the configuration tree */
-  private[flexiconf] def group = new DirectiveDefinition(name = "$group", parameters = List(Parameter("name")))
+  private[flexiconf] def group =
+    new DirectiveDefinition(name = "$group", parameters = List(Parameter("name")))
 
   /** Includes directives from a pre-defined group in the configuration tree */
-  private[flexiconf] def use(ds: Set[DirectiveDefinition]) = new DirectiveDefinition( name = "$use", children = ds, parameters = List(Parameter("pattern")))
+  private[flexiconf] def use(ds: Set[DirectiveDefinition]) =
+    new DirectiveDefinition( name = "$use", children = ds, parameters = List(Parameter("pattern")))
 
   /** Placeholder for errors encountered when parsing a configuration tree */
-  private[flexiconf] def warning = new DirectiveDefinition(name = "$warning", parameters = List(Parameter("message")))
+  private[flexiconf] def warning =
+    new DirectiveDefinition(name = "$warning", parameters = List(Parameter("message")))
 
   /** Placeholder for unknown directives when reading a configuration tree */
   private[flexiconf] val unknown = new DirectiveDefinition(name = "unknown")
@@ -69,23 +75,17 @@ object DirectiveDefinition {
   }
 
   /** Returns a directive builder for a directive with the specified name */
-  def withName(name: String) = Builder(name)
+  def withName(name: String): Builder = Builder(name)
 
   /** Returns a directive builder for a directive with the specified name */
   private[flexiconf] def withUnsafeName(name: String) = Builder(name = name, allowInternal = true)
 
   case class Builder private[flexiconf] (name: String,
-                                      parameters: List[Parameter] = List.empty,
-                                      flags: Set[DirectiveFlag] = Set.empty,
-                                      documentation: String = "",
-                                      children: Set[DirectiveDefinition] = Set.empty,
-                                      allowInternal: Boolean = false) {
-
-    // Name validation
-    if (name == null) {
-      throw new NullPointerException
-    }
-
+                                         parameters: List[Parameter] = List.empty,
+                                         flags: Set[DirectiveFlag] = Set.empty,
+                                         documentation: String = "",
+                                         children: Set[DirectiveDefinition] = Set.empty,
+                                         allowInternal: Boolean = false) {
     if (name.isEmpty) {
       throw new IllegalArgumentException("Name cannot be empty")
     }
@@ -97,63 +97,59 @@ object DirectiveDefinition {
     // Public methods
 
     /** Adds a new string parameter */
-    def withStringArg(name: String) = {
+    def withStringArg(name: String): Builder = {
       withArgument(name, StringArgument)
     }
 
     /** Adds a new boolean parameter */
-    def withBoolArg(name: String) = {
+    def withBoolArg(name: String): Builder = {
       withArgument(name, BoolArgument)
     }
 
     /** Adds a new integer parameter */
-    def withIntArg(name: String) = {
+    def withIntArg(name: String): Builder = {
       withArgument(name, IntArgument)
     }
 
     /** Adds a new decimal parameter */
-    def withDecimalArg(name: String) = {
+    def withDecimalArg(name: String): Builder = {
       withArgument(name, DecimalArgument)
     }
 
     /** Adds a new duration parameter */
-    def withDurationArg(name: String) = {
+    def withDurationArg(name: String): Builder = {
       withArgument(name, DurationArgument)
     }
 
     /** Adds a new percentage parameter */
-    def withPercentageArg(name: String) = {
+    def withPercentageArg(name: String): Builder = {
       withArgument(name, PercentageArgument)
     }
 
     /** Add documentation for this directive */
-    def withDocumentation(documentation: String) = {
+    def withDocumentation(documentation: String): Builder = {
       copy(documentation = documentation)
     }
 
     /** Allow a directive to be used multiple times within a scope */
-    def allowOnce() = {
+    def allowOnce(): Builder = {
       copy(flags = flags + DirectiveFlags.AllowOnce)
     }
 
     /** Allows one or more child directives within a block supplied to this directive */
     @varargs
-    def withDirectives(ds: DirectiveDefinition*) = {
+    def withDirectives(ds: DirectiveDefinition*): Builder = {
       copy(children = children ++ ds)
     }
 
     /** Returns new Directive with the previously defined options */
-    def build = DirectiveDefinition(name, parameters, flags, documentation, children)
+    def build: DirectiveDefinition = DirectiveDefinition(name, parameters, flags, documentation, children)
 
 
     // Private methods
 
     /** Adds a new parameter with the provided name and type */
     private def withArgument(name: String, kind: ArgumentKind[_]) = {
-      if (name == null) {
-        throw new NullPointerException
-      }
-
       if (name.isEmpty) {
         throw new IllegalArgumentException("Name cannot be empty")
       }

@@ -3,7 +3,7 @@ package se.blea.flexiconf.cli.actions
 import java.io.FileOutputStream
 
 import se.blea.flexiconf.SchemaOptions
-import se.blea.flexiconf.cli.OptionParser
+import se.blea.flexiconf.cli.{CLI, OptionParser}
 import se.blea.flexiconf.docgen.TemplateDocGenerator
 
 /** Generate documentation for a schema */
@@ -30,7 +30,7 @@ object GenerateDocsAction extends Action {
       schemaOpts <- Some(SchemaOptions.withSourceFile(schemaPath))
       schema <- parseSchema(schemaOpts)
     } yield {
-      val out = documentationFilePath.map(new FileOutputStream(_)).getOrElse(System.out)
+      val out = documentationFilePath.map(new FileOutputStream(_)).getOrElse(CLI.outStream)
       out.write(new TemplateDocGenerator(options.templatePath).process(schema).getBytes)
     }
   }

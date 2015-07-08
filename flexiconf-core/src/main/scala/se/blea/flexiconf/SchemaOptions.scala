@@ -17,6 +17,6 @@ case class SchemaOptions private (private[flexiconf] val sourceFile: String = ""
 
 
 object SchemaOptions {
-  def withSourceFile(sourceFile: String) = SchemaOptions(sourceFile = sourceFile)
-  def withInputStream(streamName: String, inputStream: InputStream) = SchemaOptions(inputStream = Option(inputStream))
+  def withSourceFile(sourceFile: String): SchemaOptions = SchemaOptions(sourceFile = sourceFile)
+  def withInputStream(streamName: String, inputStream: InputStream): SchemaOptions = SchemaOptions(inputStream = Option(inputStream))
 }

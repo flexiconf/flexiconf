@@ -12,7 +12,7 @@ sealed trait ArgumentValue {
 
   /** Return this value, or the other value **/
   def or(other: ArgumentValue): ArgumentValue = OptionalValue(this, other)
-  def |(other: ArgumentValue) = or(other)
+  def |(other: ArgumentValue): ArgumentValue = or(other) // scalastyle:ignore method.name
 }
 
 
@@ -42,7 +42,7 @@ case class OptionalValue(value: ArgumentValue, other: ArgumentValue) extends Arg
   override def boolValue: Option[Boolean] = value.boolValue.orElse(other.boolValue)
   override def longValue: Option[Long] = value.longValue.orElse(other.longValue)
   override def stringValue: Option[String] = value.stringValue.orElse(other.stringValue)
-  override def or(other2: ArgumentValue) = OptionalValue(other, other2)
+  override def or(other2: ArgumentValue): ArgumentValue = OptionalValue(other, other2)
 }
 
 
@@ -54,7 +54,7 @@ object NullValue extends ArgumentValue {
   override def boolValue: Option[Boolean] = None
   override def longValue: Option[Long] = None
   override def stringValue: Option[String] = None
-  override def or(other: ArgumentValue) = other
+  override def or(other: ArgumentValue): ArgumentValue = other
 }
 
 

@@ -92,7 +92,7 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
     val source = sourceFromContext(ctx)
     val arguments = ArgumentVisitor(ctx.argumentList)
     val allowedDirectives = stack.peek.map(_.node.allowedDirectives).getOrElse(Set.empty)
-    val maybeDirective = MaybeDirective(name, arguments, hasBlock = ctx.directiveList != null)
+    val maybeDirective = MaybeDirective(name, arguments, hasBlock = Option(ctx.directiveList).nonEmpty)
 
     // Determine if the directive can be matched
     DirectiveDefinition.find(maybeDirective, allowedDirectives) map { directive =>
@@ -132,20 +132,21 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
   }
 
   /** Returns list of nodes from a context containing possible directives */
+  def visitDirectives: List[ConfigNode] = List.empty
   def visitDirectives(ctx: ParserRuleContext): List[ConfigNode] = ctx match {
     case ctx: DirectiveListContext => (ctx.directive flatMap visitDirective).toList
     case _ => List.empty
   }
 
   /** Associate a named group of directives with the closest, non-internal node or the root node */
-  def addGroup(name: String, directives: DirectiveListContext) = {
+  def addGroup(name: String, directives: DirectiveListContext): Unit = {
     stack.find(_.node.isUserNode) map { ctx =>
       stack.replace(ctx, ctx.withGroup(name, directives))
     }
   }
 
   /** Associate a directive with the closest, non-internal node or the root node */
-  def addDirective(directive: DirectiveDefinition) = {
+  def addDirective(directive: DirectiveDefinition): Unit = {
     stack.find(_.node.isUserNode) map { ctx =>
       stack.replace(ctx, ctx.withDirective(directive))
     }
@@ -172,5 +173,5 @@ private[flexiconf] class ConfigVisitor(options: ConfigVisitorOptions,
 /** Companion for ConfigNodeVisitor */
 private[flexiconf] object ConfigVisitor {
   def apply(opts: ConfigVisitorOptions,
-            stack: Stack[ConfigVisitorContext] = Stack.empty) = new ConfigVisitor(opts, stack)
+            stack: Stack[ConfigVisitorContext] = Stack.empty): ConfigVisitor = new ConfigVisitor(opts, stack)
 }

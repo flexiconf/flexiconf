@@ -19,5 +19,5 @@ class Config(private val _config: se.blea.flexiconf.Config) {
 
   def getWarnings: java.util.List[String] = _config.warnings
 
-  def renderTree = _config.renderTree
+  def renderTree: String = _config.renderTree
 }

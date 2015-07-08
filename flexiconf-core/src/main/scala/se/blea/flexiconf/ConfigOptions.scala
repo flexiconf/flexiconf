@@ -14,50 +14,50 @@ case class ConfigOptions private (private[flexiconf] val sourceFile: String = ""
 
   private[flexiconf] var visitorOpts = ConfigVisitorOptions(sourceFile)
 
-  def ignoreDuplicateDirectives = {
+  def ignoreDuplicateDirectives: ConfigOptions = {
     visitorOpts = visitorOpts.copy(allowDuplicateDirectives = true)
     this
   }
 
-  def ignoreUnknownDirectives = {
+  def ignoreUnknownDirectives: ConfigOptions = {
     visitorOpts = visitorOpts.copy(allowUnknownDirectives = true)
     this
   }
 
-  def ignoreMissingGroups = {
+  def ignoreMissingGroups: ConfigOptions = {
     visitorOpts = visitorOpts.copy(allowMissingGroups = true)
     this
   }
 
-  def ignoreMissingIncludes = {
+  def ignoreMissingIncludes: ConfigOptions = {
     visitorOpts = visitorOpts.copy(allowMissingIncludes = true)
     this
   }
 
-  def ignoreIncludeCycles = {
+  def ignoreIncludeCycles: ConfigOptions = {
     visitorOpts = visitorOpts.copy(allowIncludeCycles = true)
     this
   }
 
-  def withDirectives(ds: Set[DirectiveDefinition]) = {
+  def withDirectives(ds: Set[DirectiveDefinition]): ConfigOptions = {
     visitorOpts = visitorOpts.copy(directives = visitorOpts.directives ++ ds)
     this
   }
 
-  def withDirectives(d: DirectiveDefinition*) = {
+  def withDirectives(d: DirectiveDefinition*): ConfigOptions = {
     visitorOpts = visitorOpts.copy(directives = visitorOpts.directives ++ d)
     this
   }
 
-  def withSchema(s: Schema) = {
+  def withSchema(s: Schema): ConfigOptions = {
     visitorOpts = visitorOpts.copy(directives = visitorOpts.directives ++ s.toDirectives)
     this
   }
 }
 
 object ConfigOptions {
-  def withSourceFile(sourceFile: String) = ConfigOptions(sourceFile = sourceFile)
-  def withInputStream(streamName: String, inputStream: InputStream) = ConfigOptions(inputStream = Option(inputStream))
+  def withSourceFile(sourceFile: String): ConfigOptions = ConfigOptions(sourceFile = sourceFile)
+  def withInputStream(streamName: String, inputStream: InputStream): ConfigOptions = ConfigOptions(inputStream = Option(inputStream))
 }
 
 

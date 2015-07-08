@@ -49,6 +49,7 @@ class DirectiveSpec extends FlatSpec with Matchers {
   behavior of "getArgs"
 
   it should "return args in order" in {
+    // scalastyle:off magic.number
     directive.getArgs.size() shouldEqual 6
     directive.getArgs.get(0).getName shouldEqual "string"
     directive.getArgs.get(1).getName shouldEqual "int"
@@ -56,6 +57,7 @@ class DirectiveSpec extends FlatSpec with Matchers {
     directive.getArgs.get(3).getName shouldEqual "decimal"
     directive.getArgs.get(4).getName shouldEqual "percentage"
     directive.getArgs.get(5).getName shouldEqual "duration"
+    // scalastyle:off magic.number
   }
 
   behavior of "hasDirective"
